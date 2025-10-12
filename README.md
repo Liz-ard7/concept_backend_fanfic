@@ -14,7 +14,7 @@ First, [fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-r
 
 Deno is a successor to Node.js (by the same creator, Ryan Dahl) that greatly simplifies tooling, is more secure by default, and is backwards-compatible with the larger ecosystem. Check out Deno's [extensive documentation](https://docs.deno.com/runtime/) for various helpful guides on a wide variety of common application needs and [integrations](https://docs.deno.com/examples/).
 
-**Note:** when importing from `npm` packages, prefix with `npm:` as in: 
+**Note:** when importing from `npm` packages, prefix with `npm:` as in:
 ```typescript
 import { MongoClient } from "npm:mongo"
 ```
@@ -49,14 +49,14 @@ For this project, we'll be using MongoDB as the database. To get started, use ei
 2. When selecting a template, choose the __free__ option, M0.
 4. At the Security Quickstart page, select how you want to authenticate your connection and keep the rest of the defaults. Make sure to allow access to all IPs as shown in [this slide](https://docs.google.com/presentation/d/1DBOWIQ2AAGQPDRgmnad8wN9S9M955LcHYZQlnbu-QCs/edit?usp=sharing).
 5. Once created, click the __CONNECT__ button, select __driver__, and copy the srv connection string. If using username and password, the url should look something like this: `mongodb+srv://<username>:<password>@cluster0.p82ijqd.mongodb.net/?retryWrites=true&w=majority`. Make sure to replace username and password with your actual values.
-6. Add your connection url (without `<` and `>`) to `MONGODB_URL=<connection url>` to your `.env` file. 
+6. Add your connection url (without `<` and `>`) to `MONGODB_URL=<connection url>` to your `.env` file.
 7. Give your database a name under `DB_NAME=<your database name>`.
 
 ## 5. Install Obsidian
 
 [Obsidian](https://obsidian.md)
 
-Obsidian is an open-source Markdown editor and personal knowledge management solution. The Context tool **does not** require use of Obsidian, and you may use any preferred editor, but we highly recommend using Obsidian to navigate your assignment and the generated context to write, view, and structure your prompts and design documents. 
+Obsidian is an open-source Markdown editor and personal knowledge management solution. The Context tool **does not** require use of Obsidian, and you may use any preferred editor, but we highly recommend using Obsidian to navigate your assignment and the generated context to write, view, and structure your prompts and design documents.
 
 ### Link settings
 
@@ -66,7 +66,7 @@ This should be correctly set already, but under Obsidian -> Settings -> Files an
 
 ![](media/obsidian_settings.png)
 
-# Exercise 0 
+# Exercise 0
 
 Context is a simple Markdown-based framework for building design knowledge and collaborating with an LLM. There is no additional syntax: any text-based repository with code of any language with documentation written as Markdown is compatible.
 
@@ -76,7 +76,7 @@ Context is a simple Markdown-based framework for building design knowledge and c
 
 ## 1. Getting started with Context
 
-Context allows you to treat any Markdown document as a conversation with an LLM: everything in the document is exactly what both you and the LLM sees. Each step is broken up by `# Heading 1` sections, and you should begin every new prompt or chunk of interesting information using a new section 1 heading. 
+Context allows you to treat any Markdown document as a conversation with an LLM: everything in the document is exactly what both you and the LLM sees. Each step is broken up by `# Heading 1` sections, and you should begin every new prompt or chunk of interesting information using a new section 1 heading.
 
 ### Task:
 
@@ -86,7 +86,7 @@ In `design/brainstorming/questioning.md`, complete the `# prompt: Why ... ?` wit
 ./ctx prompt design/brainstorming/questioning.md
 ```
 
-You should see any thinking appear in the terminal, with the rest of the completion streamed into the file. In general, you can `prompt` a LLM to chime in with 
+You should see any thinking appear in the terminal, with the rest of the completion streamed into the file. In general, you can `prompt` a LLM to chime in with
 
 ```shell
 ./ctx prompt <path_to_file>.md
@@ -104,9 +104,9 @@ Drag and drop `concept-design-overview` into the body of `understanding-concepts
 
 ![](media/linking.png)
 
-**Important:** includes should be on their own paragraph - make sure that there's an empty line between them and other content. 
+**Important:** includes should be on their own paragraph - make sure that there's an empty line between them and other content.
 
-Next, type `# question: ...` and fill in any question you have about concepts, then prompt through Context. 
+Next, type `# question: ...` and fill in any question you have about concepts, then prompt through Context.
 
 **Tip:** you can easily get the relative link you need to paste into a terminal after `./ctx prompt` by right/ctrl clicking the file in the explorer directly:
 
@@ -114,11 +114,11 @@ Next, type `# question: ...` and fill in any question you have about concepts, t
 
 ## 3. Viewing context
 
-The `context` directory is an immutable and complete history of every file that the tool interacts with - this means that you shouldn't be afraid of editing or deleting files! This directory is a mirror of the rest of the repository, just nested one layer deeper. In addition, files such as `understanding-concepts.md` become a directory, as in `understanding-concepts.md/` and contain a timestamped version of its entire history. 
+The `context` directory is an immutable and complete history of every file that the tool interacts with - this means that you shouldn't be afraid of editing or deleting files! This directory is a mirror of the rest of the repository, just nested one layer deeper. In addition, files such as `understanding-concepts.md` become a directory, as in `understanding-concepts.md/` and contain a timestamped version of its entire history.
 
 ### Context folders
 
-Each Markdown file within these directories have the format `timestamp.hash_id.md`, where the `hash_id` is a **content-based hash** that helps you identify, across the entire repository, usages of the same document or content. 
+Each Markdown file within these directories have the format `timestamp.hash_id.md`, where the `hash_id` is a **content-based hash** that helps you identify, across the entire repository, usages of the same document or content.
 
 ### Individual steps
 
@@ -136,7 +136,7 @@ Inside the `steps` directory one layer deeper are granular files of the form `st
 **Note:** `ctx save` is only necessary if you manually edit files, such as your second response to `questioning` or your solutions that you copy paste into `exercise-0`. Any time you `ctx prompt`, both the before and after versions are automatically saved.
 # Implementing concepts
 
-You're now ready to create the context that you need to implement concepts with (or without) the aid of an LLM! We've provided you with a number of documents/prompts in `design/background`, each its own self-contained bit of knowledge about concept design in general and implementing them in TypeScript. 
+You're now ready to create the context that you need to implement concepts with (or without) the aid of an LLM! We've provided you with a number of documents/prompts in `design/background`, each its own self-contained bit of knowledge about concept design in general and implementing them in TypeScript.
 
 - `design/background`: Background knowledge that you should treat as both prompts and documentation for you to read about concept design. Feel free to add any additional background documents that you think are good prompts. Also, if you think you can contribute, you may also edit any existing prompts and point them out!
 - `design/brainstorm`: Plan, chat with an LLM, use as a scratch pad - create and synthesize context about your potential ideas.
@@ -149,7 +149,7 @@ Implement your concepts, either using LLM assistance through `ctx prompt`, or im
 
 ### Sample concept: LikertSurvey
 
-We've included a sample concept called LikertSurvey. This is a different version than shown in lecture, where the specification itself was also completely generated. You can inspect `design/concepts/LikertSurvey` to see exactly how this was done, and its history in `context`. This concept is saved, so feel free to delete the design or the source code (useful to delete at least the testing file to prevent it from running when you execute all tests). 
+We've included a sample concept called LikertSurvey. This is a different version than shown in lecture, where the specification itself was also completely generated. You can inspect `design/concepts/LikertSurvey` to see exactly how this was done, and its history in `context`. This concept is saved, so feel free to delete the design or the source code (useful to delete at least the testing file to prevent it from running when you execute all tests).
 
 **Generated concept:** notice that `LikertSurvey/LikertSurvey.md` is actually a link pointing to the specific **step** of that previous generation in the context! This is also an embedded link, meaning that Obsidian previews it for you automatically. You can upgrade any link to an embedded link by putting an `!` in front of it, and as long as you still have the `@` sign in the link text, Context will treat it as an include all the same.
 
@@ -169,7 +169,7 @@ where the `-A` flag means to give all permissions. Be careful with this - it's c
 **Confirming your setup:** run the command above to make sure that you've configured everything correctly. You should see in your MongoDB Atlas console the created collections in the test database! These are temporary and will be wiped every time you start a new test.
 ### Tips for including code
 
-Since `.ts` files don't show up in Obsidian, VSCode has a similar option where you can right/ctrl click a code file, and `Copy Relative Path` to get a repo-based link to include in your context. 
+Since `.ts` files don't show up in Obsidian, VSCode has a similar option where you can right/ctrl click a code file, and `Copy Relative Path` to get a repo-based link to include in your context.
 
 Context understands both the relative links generated by default when dragging files in Obsidian, as well as repo-based links. When you copy-paste these kinds of links from outside sources, you'll need to additionally prepend the link with a `/` to tell Context that it should look it up from the repo root:
 ```md
@@ -178,3 +178,33 @@ Context understands both the relative links generated by default when dragging f
 
 This also turns out to be the same convention that Github uses, so you'll be able to navigate your links there too!
 
+
+# My Work
+
+## Concept 1: UserAuthentication
+
+1. [Link to Specification File](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationConcept.md)
+2. [Implementation file](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationImplementation.md)
+3. [Test script file](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationTests.md)
+4. [Test script output](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationTestOutput.md)
+5. [Design changes](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationDesignChanges.md)
+
+## Concept 2: Library
+
+1. [Link to Specification File](design/concepts/LikertSurvey/Library/LibraryConcept.md)
+2. [Implementation file](design/concepts/LikertSurvey/Library/LibraryImplementation.md)
+3. [Test script file](design/concepts/LikertSurvey/Library/LibraryTests.md)
+4. [Test script output](design/concepts/LikertSurvey/Library/LibraryTestOutput.md)
+5. [Design changes](design/concepts/LikertSurvey/Library/LibraryDesignChanges.md)
+
+## Concept 3: Categorization
+
+1. [Link to Specification File](design/concepts/Categorizing/CategorizingConcept.md)
+2. [Implementation file](design/concepts/Categorizing/CategorizingImplementation.md)
+3. [Test script file](design/concepts/Categorizing/CategorizingTests.md)
+4. [Test script output](design/concepts/Categorizing/CategorizingTestOutput.md)
+5. [Design changes](design/concepts/Categorizing/CategorizingDesignChanges.md)
+
+---
+
+[Link to design changes to the application](design/concepts/ApplicationDesignChanges.md)
