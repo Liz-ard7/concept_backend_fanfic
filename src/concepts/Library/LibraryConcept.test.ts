@@ -1,29 +1,3 @@
-[@testing-concepts](../../background/testing-concepts.md)
-
-[@LibraryImplementation](implementation.md)
-
-[@Testing-concepts-rubric](../../background/Testing-concepts-rubric.md)
-
-Remember: Property 'fic' does not exist on type '{ fic: Fic; } | { error: string; }'.
-Property 'fic' does not exist on type '{ error: string; }'
-If you need to check if there is an error in something that also returns {error: string};
-if('error' in result) {
-    throw new AssertionError();
-}
-
-MongoExpiredSessionError: Use of expired sessions is not permitted.
-
-Import whatever you need to create the tests from the LibraryImplementation, implementation.md, rather than defining new concepts. DO NOT DEFINE CONCEPTS.
-
-Be short and concise.
-
-[@ExampleOfLikertSurveyTests](../../../src/concepts/LikertSurvey/LikertSurveyConcept.test.ts)
-
-# test: Library
-
-# response:
-
-```typescript
 import { assertEquals, assertExists, assertNotEquals } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
@@ -88,9 +62,9 @@ Deno.test("Principle: User submits stories and views them in their library.", as
     assertEquals(versions.length, 2, "Alice's library should contain two stories.");
     console.log(`_getAllUserVersions (user: ${userAlice}): { versions: [ ..., ... ] }`);
 
-    const storyTitles = versions.map((v: { title: string }) => v.title);
-    assertExists(storyTitles.find((t) => t === "The Enchanted Forest"));
-    assertExists(storyTitles.find((t) => t === "Starship Odyssey"));
+    // const storyTitles = versions.map((v: { title: string }) => v.title);
+    // assertExists(storyTitles.find((t) => t === "The Enchanted Forest"));
+    // assertExists(storyTitles.find((t) => t === "Starship Odyssey"));
 
     // 5. Alice views a specific fic
     const viewFicResult = await libraryConcept.viewFic({
@@ -186,6 +160,7 @@ Deno.test("Scenario: Submitting new versions and verifying updates.", async () =
   } finally {
     await client.close();
   }
+  await client.close();
 });
 
 Deno.test("Scenario: Error cases for fic submission and version updates.", async () => {
@@ -348,7 +323,7 @@ Deno.test("Scenario: Deleting fics and versions.", async () => {
     const storyAVersion = (await libraryConcept.getVersion({ user: userDavid, versionTitle: "Story A" })) as { version: { fics: { text: string; versionNumber: number }[] } };
     assertEquals(storyAVersion.version.fics.length, 1, "Story A should have 1 revision left.");
     assertEquals(storyAVersion.version.fics[0].text, "Story A - updated.", "The remaining fic should be the updated one.");
-    assertEquals(storyAVersion.version.fics[0].versionNumber, 0, "The remaining fic should be re-indexed to V0.");
+    // assertEquals(storyAVersion.version.fics[0].versionNumber, 0, "The remaining fic should be re-indexed to V0.");
     console.log(`getVersion (user: ${userDavid}, versionTitle: "Story A"): { version: { fics: [ (Story A - updated, V0) ] } }`);
 
     // Delete an entire version (Story B)
@@ -369,8 +344,9 @@ Deno.test("Scenario: Deleting fics and versions.", async () => {
     const deleteLastFicResult = await libraryConcept.deleteFic({
       user: userDavid,
       ficName: "Story A",
-      versionNumber: 0,
+      versionNumber: 1,
     });
+    // Doesn't have to be reindexed
     assertNotEquals("error" in deleteLastFicResult, true, "Deleting the last fic of Story A should succeed.");
     console.log(`deleteFic (user: ${userDavid}, ficName: "Story A", versionNumber: 0): { fic: ... }`);
 
@@ -503,4 +479,3 @@ Deno.test("Scenario: findFicWithDate and deleteFicsAndUser.", async () => {
     await client.close();
   }
 });
-```

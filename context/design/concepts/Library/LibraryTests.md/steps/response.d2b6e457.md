@@ -1,25 +1,8 @@
-[@testing-concepts](../../background/testing-concepts.md)
-
-[@LibraryImplementation](implementation.md)
-
-[@Testing-concepts-rubric](../../background/Testing-concepts-rubric.md)
-
-Remember: Property 'fic' does not exist on type '{ fic: Fic; } | { error: string; }'.
-Property 'fic' does not exist on type '{ error: string; }'
-If you need to check if there is an error in something that also returns {error: string};
-if('error' in result) {
-    throw new AssertionError();
-}
-
-MongoExpiredSessionError: Use of expired sessions is not permitted.
-
-Import whatever you need to create the tests from the LibraryImplementation, implementation.md, rather than defining new concepts. DO NOT DEFINE CONCEPTS.
-
-Be short and concise.
-
-[@ExampleOfLikertSurveyTests](../../../src/concepts/LikertSurvey/LikertSurveyConcept.test.ts)
-
-# test: Library
+---
+timestamp: 'Sun Oct 12 2025 17:26:32 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251012_172632.a442983d.md]]'
+content_id: d2b6e45756e5fe7f4b9afc2eb1b633793e7b1562669a95fafd9e5198f8b906d7
+---
 
 # response:
 
