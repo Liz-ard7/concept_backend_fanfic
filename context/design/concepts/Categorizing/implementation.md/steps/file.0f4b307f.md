@@ -1,0 +1,54 @@
+---
+timestamp: 'Sun Oct 12 2025 23:38:30 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251012_233830.ac87f36a.md]]'
+content_id: 0f4b307fdf0dce5e336c181a26ff1393a2fece39c211cda727451602f7c5ddf9
+---
+
+# file: gemini-llm.ts
+
+```typescript
+/**
+ * LLM Integration for DayPlanner
+ * 
+ * Handles the requestAssignmentsFromLLM functionality using Google's Gemini API.
+ * The LLM prompt is hardwired with user preferences and doesn't take external hints.
+ */
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+/**
+ * Configuration for API access
+ */
+export interface Config {
+    apiKey: string;
+}
+
+export class GeminiLLM {
+    private apiKey: string;
+
+    constructor(config: Config) {
+        this.apiKey = config.apiKey;
+    }
+
+    async executeLLM (prompt: string): Promise<string> {
+        try {
+            // Initialize Gemini AI
+            const genAI = new GoogleGenerativeAI(this.apiKey);
+            const model = genAI.getGenerativeModel({ 
+                model: "gemini-2.5-flash-lite",
+                generationConfig: {
+                    maxOutputTokens: 1000,
+                }
+            });
+            // Execute the LLM
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            return text;            
+        } catch (error) {
+            console.error('❌ Error calling Gemini API:', (error as Error).message);
+            throw error;
+        }    }
+}
+
+```

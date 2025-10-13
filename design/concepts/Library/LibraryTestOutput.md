@@ -59,12 +59,5 @@ _getAllUserVersions (user: user:Eve): { error: "User 'user:Eve' does not exist."
 deleteFicsAndUser (user: 'user:Zoe'): { error: "User 'user:Zoe' does not exist." }
 ----- post-test output end -----
 Scenario: findFicWithDate and deleteFicsAndUser. ... ok (1s)
-running 5 tests from ./concepts/LikertSurvey/LikertSurveyConcept.test.ts
-Principle: Author creates survey, respondent answers, author views results ... ok (980ms)
-Action: createSurvey requires scaleMin < scaleMax ... ok (523ms)
-Action: addQuestion requires an existing survey ... ok (517ms)
-Action: submitResponse requirements are enforced ... ok (886ms)
-Action: updateResponse successfully updates a response and enforces requirements ... ok (1s)
-running 0 tests from ./concepts/UserAuthentication/UserAuthenticationConcept.test.ts
 
 ok | 10 passed | 0 failed (9s)

@@ -25,3 +25,23 @@ The sky appears blue primarily due to a phenomenon called **Rayleigh scattering*
 *   **Space:** In space, there's no atmosphere to scatter light, which is why the sky appears black to astronauts, even when the sun is shining.
 
 So, the next time you look up at a clear blue sky, you're witnessing a beautiful demonstration of physics in action!
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+  private getTagsCsvContext(): string {
+    const csvFilePath = '../tagsEdited2021.csv';
+
+    let csvString = 'Meow';
+    return this.readCsvFileAsString(csvFilePath);
+  }
+    private readCsvFileAsString(filePath: string): string {
+        try {
+            const fullPath = path.resolve(filePath);
+            const fileContent = fs.readFileSync(fullPath, { encoding: 'utf-8' });
+            return fileContent;
+        } catch (error) {
+            console.error(`Error reading CSV file: ${error}`);
+            throw error;
+        }
+    }

@@ -1,0 +1,319 @@
+// file: src/concepts/Categorizing/CategorizingConcept.test.ts
+
+import { assertEquals, assertExists, assertNotEquals } from "jsr:@std/assert";
+import { testDb } from "@utils/database.ts";
+import { ID } from "@utils/types.ts";
+import CategorizingConcept from "./CategorizingConcept.ts";
+import { Config as LLMConfig } from "../../../gemini-llm.ts"; // Adjust path as needed based on project structure
+
+// Load LLM API Key from environment for testing.
+// In a real scenario, this would be properly managed and not hardcoded.
+const llmConfig: LLMConfig = { apiKey: Deno.env.get("GEMINI_API_KEY") || "fake-api-key-for-tests" };
+
+// Fictional IDs for testing different scenarios
+const ficA = "fic:StoryAlpha" as ID;
+const ficB = "fic:StoryBeta" as ID;
+const ficC = "fic:StoryCharlie" as ID;
+const ficD = "fic:StoryDelta" as ID;
+const ficE = "fic:StoryEcho" as ID;
+
+
+Deno.test("Principle: User submits story, gets categorization, and can view it", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+
+  try {
+    const ficText = "A young wizard discovers a secret society and learns to cast spells. He fights an evil sorcerer.";
+    const authorTags = [{ name: "Fantasy", type: "Genre" }, { name: "Magic School", type: "Trope" }];
+
+    console.log(`\n--- Trace: Operational Principle ---`);
+    console.log(`Action: categorizeFic for ${ficA}`);
+    const categorizeResult = await categorizingConcept.categorizeFic({
+      ficId: ficA,
+      ficText: ficText,
+      authorTags: authorTags,
+    });
+    console.log(`Output: ${JSON.stringify(categorizeResult)}`);
+
+    assertNotEquals("error" in categorizeResult, true, `categorizeFic should not return an error: ${JSON.stringify(categorizeResult)}`);
+    const { suggestedTags, tagsToRemove } = categorizeResult as { suggestedTags: any[]; tagsToRemove: any[] };
+
+    assertExists(suggestedTags, "Suggested tags array should exist.");
+    assertExists(tagsToRemove, "Tags to remove array should exist.");
+    assertEquals(Array.isArray(suggestedTags), true, "Suggested tags should be an array.");
+    assertEquals(Array.isArray(tagsToRemove), true, "Tags to remove should be an array.");
+
+    // Verify viewFicCategory
+    console.log(`Action: viewFicCategory for ${ficA}`);
+    const viewResult = await categorizingConcept.viewFicCategory({ ficId: ficA });
+    console.log(`Output: ${JSON.stringify(viewResult)}`);
+
+    assertNotEquals("error" in viewResult, true, "viewFicCategory should not return an error.");
+    assertExists(viewResult, "View result should exist.");
+    assertEquals((viewResult as any)._id, ficA, "Retrieved fic ID should match.");
+    // We cannot assert exact counts or content due to LLM non-determinism, but we can check if they are arrays.
+    assertEquals(Array.isArray((viewResult as any).suggestedTags), true, "Viewed suggested tags should be an array.");
+    assertEquals(Array.isArray((viewResult as any).tagsToRemove), true, "Viewed tags to remove should be an array.");
+
+
+    // Verify _getAllFicCategories
+    console.log(`Query: _getAllFicCategories`);
+    const allCategories = await categorizingConcept._getAllFicCategories();
+    console.log(`Output: (count: ${allCategories.length})`);
+    assertEquals(allCategories.length, 1, "There should be exactly one fic category in the database.");
+    assertEquals(allCategories[0]._id, ficA, "The stored fic ID should match.");
+
+  } finally {
+    await client.close();
+  }
+});
+
+Deno.test("Scenario 1: Updating an existing fic's categorization", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+
+  try {
+    const ficTextInitial = "A very short story about a cat, playing with a ball.";
+    const authorTagsInitial = [{ name: "Animals", type: "Genre" }];
+
+    console.log(`\n--- Scenario 1: Update Existing Fic Category ---`);
+    console.log(`Action: Initial categorizeFic for ${ficB}`);
+    const initialResult = await categorizingConcept.categorizeFic({
+      ficId: ficB,
+      ficText: ficTextInitial,
+      authorTags: authorTagsInitial,
+    });
+    console.log(`Output: ${JSON.stringify(initialResult)}`);
+    assertNotEquals("error" in initialResult, true, "Initial categorization should not fail.");
+    const initialSuggestedLength = (initialResult as any).suggestedTags.length;
+
+    // Update with new, very different text
+    const ficTextUpdated = "A space opera where aliens fight for control of a galaxy.";
+    const authorTagsUpdated = [{ name: "Sci-Fi", type: "Genre" }];
+
+    console.log(`Action: categorizeFic (update) for ${ficB}`);
+    const updatedResult = await categorizingConcept.categorizeFic({
+      ficId: ficB,
+      ficText: ficTextUpdated,
+      authorTags: authorTagsUpdated,
+    });
+    console.log(`Output: ${JSON.stringify(updatedResult)}`);
+    assertNotEquals("error" in updatedResult, true, "Update categorization should not fail.");
+    const updatedSuggestedLength = (updatedResult as any).suggestedTags.length;
+
+    // Verify the update reflects in the database
+    console.log(`Query: viewFicCategory for ${ficB} after update`);
+    const viewResult = await categorizingConcept.viewFicCategory({ ficId: ficB });
+    console.log(`Output: ${JSON.stringify(viewResult)}`);
+
+    assertNotEquals("error" in viewResult, true, "View after update should not return an error.");
+    assertExists(viewResult, "View result should exist.");
+    assertEquals((viewResult as any)._id, ficB, "Retrieved fic ID should match.");
+    // Asserting length changed, indicating an update happened, but not specific content.
+    // No, and here's why: it outputs vaguely the same amount of tags every time. if it
+    // responded with ['charlie', 'michael'] the first time,
+    // it doesn't mean the second time it would be incorrect to output ['distortion', 'ella']
+    // assertNotEquals((viewResult as any).suggestedTags.length, initialSuggestedLength, "Suggested tags length should have potentially changed after update.");
+    assertEquals((viewResult as any).suggestedTags.length, updatedSuggestedLength, "Suggested tags length should match the last update's output.");
+
+    // Ensure only one entry for ficB exists after the update (upsert behavior)
+    const allCategories = await categorizingConcept._getAllFicCategories();
+    assertEquals(allCategories.filter(cat => cat._id === ficB).length, 1, "There should still be only one entry for ficB after update.");
+
+  } finally {
+    await client.close();
+  }
+});
+
+Deno.test("Scenario 2: categorizeFic action - error handling for missing inputs", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+
+  try {
+    console.log(`\n--- Scenario 2: categorizeFic Missing Inputs ---`);
+
+    // Test missing ficId
+    console.log(`Action: categorizeFic with missing ficId`);
+    const res1 = await categorizingConcept.categorizeFic({
+      ficId: "" as ID, // Invalid ID
+      ficText: "A short story.",
+      authorTags: [],
+    });
+    console.log(`Output: ${JSON.stringify(res1)}`);
+    assertEquals("error" in res1, true, "categorizeFic should return an error for missing ficId.");
+    assertEquals((res1 as any).error, "Fic ID, text, and author tags are required.", "Error message should be specific.");
+
+    // Test missing ficText
+    console.log(`Action: categorizeFic with missing ficText`);
+    const res2 = await categorizingConcept.categorizeFic({
+      ficId: ficC,
+      ficText: "", // Empty text
+      authorTags: [],
+    });
+    console.log(`Output: ${JSON.stringify(res2)}`);
+    assertEquals("error" in res2, true, "categorizeFic should return an error for missing ficText.");
+    assertEquals((res2 as any).error, "Fic ID, text, and author tags are required.", "Error message should be specific.");
+
+    // Test missing authorTags (undefined)
+    console.log(`Action: categorizeFic with undefined authorTags`);
+    const res3 = await categorizingConcept.categorizeFic({
+      ficId: ficD,
+      ficText: "Some text.",
+      authorTags: undefined as any, // Intentionally pass undefined to test guard
+    });
+    console.log(`Output: ${JSON.stringify(res3)}`);
+    assertEquals("error" in res3, true, "categorizeFic should return an error for missing authorTags.");
+    assertEquals((res3 as any).error, "Fic ID, text, and author tags are required.", "Error message should be specific.");
+
+  } finally {
+    await client.close();
+  }
+});
+
+Deno.test("Scenario 3: viewFicCategory - checking for non-existent fic and invalid input", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+  const nonExistentFic = "fic:NonExistentStory" as ID;
+
+  try {
+    console.log(`\n--- Scenario 3: viewFicCategory Error Cases ---`);
+    console.log(`Action: viewFicCategory for non-existent fic: ${nonExistentFic}`);
+    const viewResult = await categorizingConcept.viewFicCategory({ ficId: nonExistentFic });
+    console.log(`Output: ${JSON.stringify(viewResult)}`);
+
+    assertEquals("error" in viewResult, true, "viewFicCategory should return an error for a non-existent fic.");
+    assertEquals((viewResult as any).error, `FicCategory for fic ID '${nonExistentFic}' not found.`, "Error message should be specific.");
+
+    console.log(`Action: viewFicCategory with empty ficId`);
+    const viewResultEmpty = await categorizingConcept.viewFicCategory({ ficId: "" as ID });
+    console.log(`Output: ${JSON.stringify(viewResultEmpty)}`);
+    assertEquals("error" in viewResultEmpty, true, "viewFicCategory should return an error for an empty ficId.");
+    assertEquals((viewResultEmpty as any).error, `Fic ID is required.`, "Error message should be specific.");
+
+  } finally {
+    await client.close();
+  }
+});
+
+Deno.test("Scenario 4: deleteFicCategory - successful deletion and error cases", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+  const ficToDelete = "fic:EphemeralStory" as ID;
+  const ficText = "This short fic is destined for deletion.";
+
+  try {
+    console.log(`\n--- Scenario 4: deleteFicCategory ---`);
+
+    // Setup: Create a fic category to test deletion
+    console.log(`Action: categorizeFic to create ${ficToDelete}`);
+    const createResult = await categorizingConcept.categorizeFic({
+      ficId: ficToDelete,
+      ficText: ficText,
+      authorTags: [],
+    });
+    console.log(`Output: ${JSON.stringify(createResult)}`);
+    assertNotEquals("error" in createResult, true, "Pre-requisite categorization should not fail.");
+
+    // Verify it exists before deletion
+    const preDeleteView = await categorizingConcept.viewFicCategory({ ficId: ficToDelete });
+    assertNotEquals("error" in preDeleteView, true, "Fic category should exist before deletion.");
+
+    // Perform successful deletion
+    console.log(`Action: deleteFicCategory for ${ficToDelete}`);
+    const deleteResult = await categorizingConcept.deleteFicCategory({ ficId: ficToDelete });
+    console.log(`Output: ${JSON.stringify(deleteResult)}`);
+    assertNotEquals("error" in deleteResult, true, "Deletion should succeed.");
+    assertEquals((deleteResult as any)._id, ficToDelete, "Deleted fic category ID should match the input.");
+
+    // Verify it no longer exists
+    console.log(`Query: viewFicCategory for ${ficToDelete} after deletion`);
+    const postDeleteView = await categorizingConcept.viewFicCategory({ ficId: ficToDelete });
+    console.log(`Output: ${JSON.stringify(postDeleteView)}`);
+    assertEquals("error" in postDeleteView, true, "Fic category should no longer exist after deletion.");
+    assertEquals((postDeleteView as any).error, `FicCategory for fic ID '${ficToDelete}' not found.`, "Error message should confirm absence.");
+
+    // Try deleting a non-existent fic category
+    const nonExistentForDeletion = "fic:GhostStory" as ID;
+    console.log(`Action: deleteFicCategory for non-existent ${nonExistentForDeletion}`);
+    const deleteNonExistentResult = await categorizingConcept.deleteFicCategory({ ficId: nonExistentForDeletion });
+    console.log(`Output: ${JSON.stringify(deleteNonExistentResult)}`);
+    assertEquals("error" in deleteNonExistentResult, true, "Deleting a non-existent fic category should return an error.");
+    assertEquals((deleteNonExistentResult as any).error, `FicCategory for fic ID '${nonExistentForDeletion}' not found.`, "Error message should be specific.");
+
+    console.log(`Action: deleteFicCategory with empty ficId`);
+    const deleteEmptyFicId = await categorizingConcept.deleteFicCategory({ ficId: "" as ID });
+    console.log(`Output: ${JSON.stringify(deleteEmptyFicId)}`);
+    assertEquals("error" in deleteEmptyFicId, true, "Deleting with an empty ficId should return an error.");
+    assertEquals((deleteEmptyFicId as any).error, `Fic ID is required.`, "Error message should be specific.");
+
+  } finally {
+    await client.close();
+  }
+});
+
+Deno.test("Scenario 5: deleteFicCategories - multiple deletions and edge cases", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+
+  const ficMulti1 = "fic:MultiStory1" as ID;
+  const ficMulti2 = "fic:MultiStory2" as ID;
+  const ficMulti3 = "fic:MultiStory3" as ID;
+  const ficMultiNonExistent = "fic:MultiNonExistentStory" as ID;
+
+  try {
+    console.log(`\n--- Scenario 5: deleteFicCategories (Multiple Deletion) ---`);
+
+    // Setup: Create multiple fic categories
+    console.log(`Action: Create ${ficMulti1}, ${ficMulti2}, ${ficMulti3}`);
+    await categorizingConcept.categorizeFic({ ficId: ficMulti1, ficText: "Short fic for multi-deletion test 1.", authorTags: [] });
+    await categorizingConcept.categorizeFic({ ficId: ficMulti2, ficText: "Short fic for multi-deletion test 2.", authorTags: [] });
+    await categorizingConcept.categorizeFic({ ficId: ficMulti3, ficText: "Short fic for multi-deletion test 3.", authorTags: [] });
+
+    // Verify all exist initially
+    const initialCategories = await categorizingConcept._getAllFicCategories();
+    assertEquals(initialCategories.length, 3, "Initially, three fic categories should exist.");
+
+    // Delete a subset, including a non-existent ID
+    console.log(`Action: deleteFicCategories for [${ficMulti1}, ${ficMultiNonExistent}]`);
+    const deleteSubsetResult = await categorizingConcept.deleteFicCategories({ ficIds: [ficMulti1, ficMultiNonExistent] });
+    console.log(`Output: ${JSON.stringify(deleteSubsetResult)}`);
+    assertNotEquals("error" in deleteSubsetResult, true, "Deleting a subset (with a non-existent ID) should succeed for existing ones.");
+    assertEquals((deleteSubsetResult as any).deletedCount, 1, "Only 1 category should have been deleted (ficMulti1).");
+
+    // Verify remaining categories
+    const remainingCategories = await categorizingConcept._getAllFicCategories();
+    assertEquals(remainingCategories.length, 2, "After deleting one, two fic categories should remain.");
+    const remainingIds = remainingCategories.map(c => c._id);
+    assertEquals(remainingIds.includes(ficMulti1), false, "ficMulti1 should be deleted.");
+    assertEquals(remainingIds.includes(ficMulti2), true, "ficMulti2 should still exist.");
+    assertEquals(remainingIds.includes(ficMulti3), true, "ficMulti3 should still exist.");
+
+    // Delete the rest
+    console.log(`Action: deleteFicCategories for [${ficMulti2}, ${ficMulti3}]`);
+    const deleteAllRemainingResult = await categorizingConcept.deleteFicCategories({ ficIds: [ficMulti2, ficMulti3] });
+    console.log(`Output: ${JSON.stringify(deleteAllRemainingResult)}`);
+    assertNotEquals("error" in deleteAllRemainingResult, true, "Deleting all remaining should succeed.");
+    assertEquals((deleteAllRemainingResult as any).deletedCount, 2, "Two more categories should have been deleted.");
+
+    // Verify none remain
+    const finalCategories = await categorizingConcept._getAllFicCategories();
+    assertEquals(finalCategories.length, 0, "All fic categories should be deleted.");
+
+    // Error: empty ficIds array
+    console.log(`Action: deleteFicCategories with empty ficIds array`);
+    const deleteEmptyArrayResult = await categorizingConcept.deleteFicCategories({ ficIds: [] });
+    console.log(`Output: ${JSON.stringify(deleteEmptyArrayResult)}`);
+    assertEquals("error" in deleteEmptyArrayResult, true, "Deleting with an empty array should return an error.");
+    assertEquals((deleteEmptyArrayResult as any).error, `Fic IDs list cannot be empty.`, "Error message should be specific.");
+
+    // Error: no categories found or deleted (when the database is empty or no match)
+    console.log(`Action: deleteFicCategories for non-existent IDs when DB is empty`);
+    const deleteNoMatchResult = await categorizingConcept.deleteFicCategories({ ficIds: ["fic:AnotherGhostStory" as ID] });
+    console.log(`Output: ${JSON.stringify(deleteNoMatchResult)}`);
+    assertEquals("error" in deleteNoMatchResult, true, "Deleting non-existent IDs when no other categories exist should return an error.");
+    assertEquals((deleteNoMatchResult as any).error, `No FicCategories found or deleted for the provided IDs.`, "Error message should be specific.");
+
+  } finally {
+    await client.close();
+  }
+});

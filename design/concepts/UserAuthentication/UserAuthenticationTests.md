@@ -1,10 +1,10 @@
 [@testing-concepts](../../background/testing-concepts.md)
 
-[@LibraryImplementation](implementation.md)
+[@UserAuthenticationImplementation](implementation.md)
 
 [@Testing-concepts-rubric](../../background/Testing-concepts-rubric.md)
 
-# test: Library
+# test: UserAuthentication
 
 # response:
 
