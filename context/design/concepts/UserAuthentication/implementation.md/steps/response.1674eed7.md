@@ -1,6 +1,15 @@
+---
+timestamp: 'Sun Oct 12 2025 22:19:20 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251012_221920.0da7c0db.md]]'
+content_id: 1674eed7e8588b94dd38f080721233dd911e79c542cb0ad33f86034058d952df
+---
+
+# response:
+
+```typescript
 // file: src/UserAuthentication/UserAuthenticationConcept.ts
 import { Collection, Db } from "npm:mongodb";
-import { ID } from "@utils/types.ts";
+import { Empty, ID } from "@utils/types.ts";
 import { freshID } from "@utils/database.ts";
 
 // Declare collection prefix, use concept name
@@ -134,3 +143,4 @@ export default class UserAuthenticationConcept {
     return { user: userToDelete._id };
   }
 }
+```

@@ -1,6 +1,19 @@
+[@concept-specifications](../../background/concept-specifications.md)
+
+[@implementing-concepts](../../background/implementing-concepts.md)
+
+[@UserAuthenticationConcept](UserAuthenticationConcept.md)
+
+Remember: findOne returns a WithID<ID>, NOT an ID.
+
+# implement: UserAuthentication
+
+# response:
+
+```typescript
 // file: src/UserAuthentication/UserAuthenticationConcept.ts
 import { Collection, Db } from "npm:mongodb";
-import { ID } from "@utils/types.ts";
+import { Empty, ID } from "@utils/types.ts";
 import { freshID } from "@utils/database.ts";
 
 // Declare collection prefix, use concept name
@@ -134,3 +147,4 @@ export default class UserAuthenticationConcept {
     return { user: userToDelete._id };
   }
 }
+```

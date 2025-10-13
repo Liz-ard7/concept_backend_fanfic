@@ -1,10 +1,8 @@
-[@testing-concepts](../../background/testing-concepts.md)
-
-[@LibraryImplementation](implementation.md)
-
-[@Testing-concepts-rubric](../../background/Testing-concepts-rubric.md)
-
-# test: Library
+---
+timestamp: 'Sun Oct 12 2025 22:32:45 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251012_223245.bcd274b8.md]]'
+content_id: f0917435067c55ef94ff2d6c0c0ebbcecf16a002505e17deb02203d287e36429
+---
 
 # response:
 

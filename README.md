@@ -184,24 +184,36 @@ This also turns out to be the same convention that Github uses, so you'll be abl
 ## Concept 1: UserAuthentication
 
 1. [Link to Specification File](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationConcept.md)
-2. [Implementation file](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationImplementation.md)
-3. [Test script file](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationTests.md)
+2. Implementation:
+    - [Design file](design/concepts/LikertSurvey/UserAuthentication/implementation.md)
+    - [Typescript file](src/concepts/UserAuthentication/UserAuthenticationConcept.ts)
+3. Testing:
+    - [Design file](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationTests.md)
+    - [Typescript file](src/concepts/UserAuthentication/UserAuthenticationConcept.test.ts)
 4. [Test script output](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationTestOutput.md)
 5. [Design changes](design/concepts/LikertSurvey/UserAuthentication/UserAuthenticationDesignChanges.md)
 
 ## Concept 2: Library
 
 1. [Link to Specification File](design/concepts/LikertSurvey/Library/LibraryConcept.md)
-2. [Implementation file](design/concepts/LikertSurvey/Library/LibraryImplementation.md)
-3. [Test script file](design/concepts/LikertSurvey/Library/LibraryTests.md)
+2. Implementation:
+    - [Design file](design/concepts/LikertSurvey/Library/implementation.md)
+    - [Typescript file](src/concepts/Library/LibraryConcept.ts)
+3. Testing:
+    - [Design file](design/concepts/LikertSurvey/Library/LibraryTests.md)
+    - [Typescript file](src/concepts/Library/LibraryConcept.test.ts)
 4. [Test script output](design/concepts/LikertSurvey/Library/LibraryTestOutput.md)
 5. [Design changes](design/concepts/LikertSurvey/Library/LibraryDesignChanges.md)
 
 ## Concept 3: Categorization
 
 1. [Link to Specification File](design/concepts/Categorizing/CategorizingConcept.md)
-2. [Implementation file](design/concepts/Categorizing/CategorizingImplementation.md)
-3. [Test script file](design/concepts/Categorizing/CategorizingTests.md)
+2. Implementation:
+    - [Design file](design/concepts/Categorizing/implementation.md)
+    - [Typescript file](src/concepts/Categorizing/Categorizing.ts)
+3. Testing:
+    - [Design file](design/concepts/Categorizing/CategorizingTests.md)
+    - [Typescript file](src/concepts/Categorizing/Categorizing.test.ts)
 4. [Test script output](design/concepts/Categorizing/CategorizingTestOutput.md)
 5. [Design changes](design/concepts/Categorizing/CategorizingDesignChanges.md)
 
