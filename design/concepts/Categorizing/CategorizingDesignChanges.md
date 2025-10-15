@@ -9,3 +9,5 @@
 4. In the actual implementation, I realized that combining keywordGenerator and tagCleaner would
 probably be for the best, as both can be done at the same time and it is way simpler to do them
 at the same time than to do them separately and then have to combine them awkwardly.
+
+5. I realized that categorizeFic wasn't returning an ID, it was returning a composite object, so I slightly edited the concept, implementation, and test. Same for deleteFicCategories, so I made it return the count instead of a set.

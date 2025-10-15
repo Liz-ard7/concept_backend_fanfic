@@ -1,57 +1,8 @@
-# prompt: Why ... ?
-
-"Why...?" is one of the most fundamental and powerful questions we can ask. It drives curiosity, discovery, and understanding.
-
-Since you've left it open-ended, I'll pick a common "why" question and answer it to demonstrate how I approach such inquiries:
-
-**Why is the sky blue?**
-
-The sky appears blue primarily due to a phenomenon called **Rayleigh scattering**. Here's a breakdown:
-
-1.  **Sunlight is White Light:** Sunlight, when it reaches Earth, appears white to us, but it's actually made up of all the colors of the rainbow (red, orange, yellow, green, blue, indigo, violet). Each color has a different wavelength, with red having the longest and violet the shortest.
-
-2.  **Earth's Atmosphere:** Our planet is surrounded by an atmosphere composed mainly of nitrogen (about 78%) and oxygen (about 21%) molecules, along with tiny amounts of other gases and particles.
-
-3.  **Rayleigh Scattering:** When sunlight enters the atmosphere, it collides with these gas molecules. Rayleigh scattering describes how electromagnetic radiation (like sunlight) is scattered by particles that are much smaller than the wavelength of the light.
-    *   **Blue light (and violet)** has a shorter wavelength, making it scattered *much more efficiently* by the tiny nitrogen and oxygen molecules than longer wavelengths like red or yellow.
-    *   **Red and yellow light** have longer wavelengths, so they tend to pass straight through the atmosphere with less scattering.
-
-4.  **The Blue Appearance:** As the blue and violet light are scattered in all directions by the atmospheric molecules, much of this scattered blue light reaches our eyes from all angles, making the sky appear blue. (We see less violet because our eyes are less sensitive to violet light, and there's also less violet in the sun's spectrum to begin with).
-
-**What about other times?**
-
-*   **Sunsets/Sunrises:** When the sun is low on the horizon, its light has to travel through a much greater thickness of atmosphere. By the time the light reaches your eyes, most of the blue light has been scattered away, leaving the longer-wavelength reds, oranges, and yellows to dominate, creating those beautiful colors.
-*   **Space:** In space, there's no atmosphere to scatter light, which is why the sky appears black to astronauts, even when the sun is shining.
-
-So, the next time you look up at a clear blue sky, you're witnessing a beautiful demonstration of physics in action!
-
-import * as fs from 'fs';
-import * as path from 'path';
-
-  private getTagsCsvContext(): string {
-    const csvFilePath = '../tagsEdited2021.csv';
-
-    let csvString = 'Meow';
-    return this.readCsvFileAsString(csvFilePath);
-  }
-    private readCsvFileAsString(filePath: string): string {
-        try {
-            const fullPath = path.resolve(filePath);
-            const fileContent = fs.readFileSync(fullPath, { encoding: 'utf-8' });
-            return fileContent;
-        } catch (error) {
-            console.error(`Error reading CSV file: ${error}`);
-            throw error;
-        }
-    }
-
-# AAAAAAAAAAAAAAA
-```typescript
-const versionAfterV1 = (await libraryConcept._getVersion({user: userBob, versionTitle: "Epic Tale"}));
-assertNotEquals("error" in versionAfterV1, true, "New version submission should succeed.");
-assertEquals(versionAfterV1.fics.length, 2, "The version should now have two fics.");
-```
-# this doesn't work because versionAfterV1 could also be {error: string} and thus can't have .fics. How to fix?
+---
+timestamp: 'Tue Oct 14 2025 21:24:16 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251014_212416.6c07527c.md]]'
+content_id: 5ae6b4203ac2c5541dcc692ada9c6630e2e612ea5e01a09d3421b918e74fd2d9
+---
 
 # response:
 
@@ -82,7 +33,7 @@ interface VersionError {
 // declare function fail(message: string): never; // A function that always throws/exits
 ```
 
----
+***
 
 ### Method 1: Early Return/Throw (Recommended for tests)
 
@@ -108,7 +59,7 @@ if ("error" in versionAfterV1) {
 assertEquals(versionAfterV1.fics.length, 2, "The version should now have two fics.");
 ```
 
----
+***
 
 ### Method 2: User-Defined Type Guard
 
@@ -131,7 +82,7 @@ if (!isVersionSuccess(versionAfterV1)) {
 assertEquals(versionAfterV1.fics.length, 2, "The version should now have two fics.");
 ```
 
----
+***
 
 ### Method 3: Type Assertion (`as`) - Use with Caution
 
@@ -149,7 +100,7 @@ assertEquals(successVersion.fics.length, 2, "The version should now have two fic
 // assertEquals((versionAfterV1 as VersionSuccess).fics.length, 2, "The version should now have two fics.");
 ```
 
----
+***
 
 ### Method 4: Discriminated Unions (Best if you control `_getVersion`'s return type)
 
@@ -179,13 +130,13 @@ if (versionAfterV1.status === 'error') {
 }
 ```
 
----
+***
 
 **Which one to choose?**
 
-*   **Discriminated Unions (Method 4):** If you can control the `_getVersion`'s return type, this is by far the best and most robust solution, as TypeScript handles all the narrowing automatically.
-*   **Early Return/Throw (Method 1):** In a testing context, this is extremely common and clear. It clearly separates the error handling from the success logic and safely narrows the type.
-*   **User-Defined Type Guard (Method 2):** A good explicit option if you can't use discriminated unions but want strong type safety.
-*   **Type Assertion (Method 3):** Use sparingly. It's a quick fix but sacrifices type safety at that specific point. It's often acceptable in tests where you're already making strong runtime assertions, but it's not ideal for general application code.
+* **Discriminated Unions (Method 4):** If you can control the `_getVersion`'s return type, this is by far the best and most robust solution, as TypeScript handles all the narrowing automatically.
+* **Early Return/Throw (Method 1):** In a testing context, this is extremely common and clear. It clearly separates the error handling from the success logic and safely narrows the type.
+* **User-Defined Type Guard (Method 2):** A good explicit option if you can't use discriminated unions but want strong type safety.
+* **Type Assertion (Method 3):** Use sparingly. It's a quick fix but sacrifices type safety at that specific point. It's often acceptable in tests where you're already making strong runtime assertions, but it's not ideal for general application code.
 
 For your specific code snippet within a test, **Method 1 (Early Return/Throw)** is likely the most straightforward and idiomatic fix.

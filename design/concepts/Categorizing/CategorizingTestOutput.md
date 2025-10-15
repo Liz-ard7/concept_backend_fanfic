@@ -4,7 +4,7 @@ Principle: User submits story, gets categorization, and can view it ...
 
 --- Trace: Operational Principle ---
 Action: categorizeFic for fic:StoryAlpha
-Output: {"suggestedTags":[],"tagsToRemove":[]}
+Output: {"ficId":"fic:StoryAlpha"}
 Action: viewFicCategory for fic:StoryAlpha
 Output: {"_id":"fic:StoryAlpha","suggestedTags":[],"tagsToRemove":[]}
 Query: _getAllFicCategories
@@ -16,9 +16,9 @@ Scenario 1: Updating an existing fic's categorization ...
 
 --- Scenario 1: Update Existing Fic Category ---
 Action: Initial categorizeFic for fic:StoryBeta
-Output: {"suggestedTags":[],"tagsToRemove":[]}
+Output: {"ficId":"fic:StoryBeta"}
 Action: categorizeFic (update) for fic:StoryBeta
-Output: {"suggestedTags":[],"tagsToRemove":[]}
+Output: {"ficId":"fic:StoryBeta"}
 Query: viewFicCategory for fic:StoryBeta after update
 Output: {"_id":"fic:StoryBeta","suggestedTags":[],"tagsToRemove":[]}
 ----- output end -----
@@ -34,7 +34,7 @@ Output: {"error":"Fic ID, text, and author tags are required."}
 Action: categorizeFic with undefined authorTags
 Output: {"error":"Fic ID, text, and author tags are required."}
 ----- output end -----
-Scenario 2: categorizeFic action - error handling for missing inputs ... ok (921ms)
+Scenario 2: categorizeFic action - error handling for missing inputs ... ok (598ms)
 Scenario 3: viewFicCategory - checking for non-existent fic and invalid input ...
 ------- output -------
 
@@ -44,13 +44,13 @@ Output: {"error":"FicCategory for fic ID 'fic:NonExistentStory' not found."}
 Action: viewFicCategory with empty ficId
 Output: {"error":"Fic ID is required."}
 ----- output end -----
-Scenario 3: viewFicCategory - checking for non-existent fic and invalid input ... ok (480ms)
+Scenario 3: viewFicCategory - checking for non-existent fic and invalid input ... ok (584ms)
 Scenario 4: deleteFicCategory - successful deletion and error cases ...
 ------- output -------
 
 --- Scenario 4: deleteFicCategory ---
 Action: categorizeFic to create fic:EphemeralStory
-Output: {"suggestedTags":[],"tagsToRemove":[]}
+Output: {"ficId":"fic:EphemeralStory"}
 Action: deleteFicCategory for fic:EphemeralStory
 Output: {"_id":"fic:EphemeralStory","suggestedTags":[],"tagsToRemove":[]}
 Query: viewFicCategory for fic:EphemeralStory after deletion
@@ -75,5 +75,6 @@ Output: {"error":"Fic IDs list cannot be empty."}
 Action: deleteFicCategories for non-existent IDs when DB is empty
 Output: {"error":"No FicCategories found or deleted for the provided IDs."}
 ----- output end -----
-Scenario 5: deleteFicCategories - multiple deletions and edge cases ... ok (3s)
-ok | 17 passed (5 steps) | 0 failed (19s)
+Scenario 5: deleteFicCategories - multiple deletions and edge cases ... ok (2s)
+
+ok | 17 passed (5 steps) | 0 failed (20s)
