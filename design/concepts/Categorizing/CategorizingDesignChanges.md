@@ -11,3 +11,5 @@ probably be for the best, as both can be done at the same time and it is way sim
 at the same time than to do them separately and then have to combine them awkwardly.
 
 5. I realized that categorizeFic wasn't returning an ID, it was returning a composite object, so I slightly edited the concept, implementation, and test. Same for deleteFicCategories, so I made it return the count instead of a set.
+
+6. I realized authorTags wasn't a primitive nor an ID, so instead I changed it to a string that is split into a list by newlines.

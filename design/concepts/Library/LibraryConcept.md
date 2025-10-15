@@ -22,7 +22,7 @@
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a Text String
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a set of authorTags strings
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; an authorTags string
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a Date
 
@@ -45,14 +45,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** adds user to set of Users, associates user with empty set of Versions with an empty set of Fics.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **submitNewFic** (user, ficText: string, ficName: string, authorTags: set of Strings, date) : (fic)
+&nbsp;&nbsp;&nbsp;&nbsp; **submitNewFic** (user, ficText: string, ficName: string, authorTags: String, date) : (fic)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the ficName to not exist within the set of the user's Versions' Title. user must exist in set of Users
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** create a Fic containing the fic's ficName as Name, ficText as Text, date as date, versionNumber as 0, and authorTags as the set of authorTags. Create a new Version with ficName as the Title, add the Fic to the new version's set of Fics. Finally, add the new version to the user's set of Versions, and finally return the fic.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **submitNewVersionOfFanfic** (user, ficText: string, authorTags: set of Strings, version, date, ficName: string) : (version)
+&nbsp;&nbsp;&nbsp;&nbsp; **submitNewVersionOfFanfic** (user, ficText: string, authorTags: string, version, date, ficName: string) : (version)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users, version must exist within the user's set of Versions
 
