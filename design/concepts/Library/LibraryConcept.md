@@ -59,7 +59,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** create a Fic containing the fic's ficName as Name, ficText as Text, date as date, versionNumber as the length of the set of Fics within the version + 1, and authorTags as the set of authorTags. Then, add the Fic to the version within the user's set of Versions. Finally, return the Version.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **viewFic** (user, ficName: string, versionNumber: Number): (fic)
+&nbsp;&nbsp;&nbsp;&nbsp; **_viewFic** (user, ficName: string, versionNumber: Number): (fic)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the ficName to exist within the set of the user's Versions' Title. user must exist in set of Users, versionNumber must exist within the range from 0 to the length of the set of Fics in version.
 
@@ -80,14 +80,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** removes all versions from the set of user's Versions, then removes user from set of Users.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **findFicWithDate** (user, date: Date): (set of Fics)
+&nbsp;&nbsp;&nbsp;&nbsp; **_findFicWithDate** (user, date: Date): (set of Fics)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** returns a set of Fics with dates matching the provided date. If there are no such fics, it returns an empty set.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **getVersion** (user, versionTitle: string): (version)
+&nbsp;&nbsp;&nbsp;&nbsp; **_getVersion** (user, versionTitle: string): (version)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users, versionTitle must exist within the user's set of Versions' Titles.
 

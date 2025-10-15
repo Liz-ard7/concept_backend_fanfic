@@ -36,7 +36,7 @@
 Type of tags includes: ArchiveWarning, fandom, character, relationship, freeform, rating, category. using an LLM, the LLM will examine the fic's ficText's contents, then compare it to each authorTag in the foc's set of authorTags. If an authorTag seems inappropriate for the fic, it will add it to a Category of tags to remove (including its name, type, and reason for removal). At the very end, if there is already a ficCategory associated with fic, it will add the tagsToRemove Category to the ficCategory. If not, it'll create a new ficCategory and associate the fic and tagsToRemovewith it, and add it to the set of ficCategories. Finally, it returns the tagsToRemove.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **viewFicCategory** (fic) : (ficCategory)
+&nbsp;&nbsp;&nbsp;&nbsp; **_viewFicCategory** (fic) : (ficCategory)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the fic to be associated with a ficCategory in the set of ficCategories
 
