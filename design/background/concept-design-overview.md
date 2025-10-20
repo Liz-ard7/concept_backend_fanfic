@@ -1,6 +1,6 @@
 # Why Concept Design?
 
-Concept design is a new approach to software development that attempts to find greater modularity in the structuring of the functionality of applications. The key idea is to break the functionality down into separable, modular services called *concepts*, each of which can be specified, implemented and understood separately -- by users and by developers. 
+Concept design is a new approach to software development that attempts to find greater modularity in the structuring of the functionality of applications. The key idea is to break the functionality down into separable, modular services called *concepts*, each of which can be specified, implemented and understood separately -- by users and by developers.
 
 The advantages of concept design include:
 - Improved separation of concerns resulting in simpler and more robust design and implementation;
@@ -40,7 +40,7 @@ Polymorphism is key to independence: the designer of a concept should strive to 
 
 ## Separation of concerns
 
-One of the key advances of concept design is a more effective *separation of concerns* than is typical in software designs. This means that each concept addresses only a single, coherent aspect of the functionality of the application, and does not conflate aspects of functionality that could easily be separated. 
+One of the key advances of concept design is a more effective *separation of concerns* than is typical in software designs. This means that each concept addresses only a single, coherent aspect of the functionality of the application, and does not conflate aspects of functionality that could easily be separated.
 
 In a traditional design, in contrast, concerns are often conflated, especially around objects (or classes). For example, it is common for a *User* class to handle all kinds of functions associated with users: authentication, profiles, naming, choice of communication channels for notification, and more. In a concept design, these would be separated into different concepts: one for authentication, one for profiles, one for naming, one for notification, and so on. The state declaration form makes it easy to associate the appropriate properties or fields with user objects in each concept. For example, the *UserAuthentication* concept may have a state that maps user identifiers to usernames and passwords; the *Profile* concept may map user identifiers to bios and thumbnail images; the *Notification* concept may map user identifiers to phone numbers and email addresses to be used as notification channels.
 
@@ -54,18 +54,18 @@ Because concepts are fully independent of one another, they cannot refer to each
 
 ```
 sync CascadePostDeletion
-when 
+when
 	Post.delete (p)
-where 
+where
 	in Comment: target of c is p
-then 
+then
 	Comment.delete (c)
 ```
 
 
 Not that the syncs is not only causing an action to happen but also providing input arguments to actions (in this case the comment to be deleted).
 
-A sync can have multiple actions in its when and then clauses, and can refer to the state of multiple concepts in the where clause. 
+A sync can have multiple actions in its when and then clauses, and can refer to the state of multiple concepts in the where clause.
 
 Some other examples of how syncs are used:
 - When a user comments on another user's post, the second user is notified
@@ -76,11 +76,11 @@ Syncs can be used for authentication and authorization. In these case, it is com
 
 ```
 sync DeletePost
-when 
+when
 	Request.deletePost (p, s)
-where 
+where
 	in Session: user of session s is u
 	in Post: author of p is u
-then 
+then
 	Post.delete (p)
 ```

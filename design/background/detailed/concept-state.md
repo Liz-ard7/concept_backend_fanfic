@@ -36,7 +36,7 @@ A set of users, and a subset that have been banned on a particular date and by a
 	a set of Users with
 	  a username String
 	  a password String
-	
+
 	a Banned set of Users with
 	  a bannedOn Date
 	  a bannedBy User
@@ -46,7 +46,7 @@ A subset without any relations:
 	a set of Users with
 	  a username String
 	  a password String
-	
+
 	a Banned set of Users
 
 A set of items, classified into books and movies:
@@ -54,17 +54,17 @@ A set of items, classified into books and movies:
 	a set of Items with
 	  a title String
 	  a created Date
-	
+
 	a Books set of Items with
 	  an isbn String
 	  a pageCount Number
 	  an author Person
-	  
+
 	a Movies set of Items with
 	   an imdb String
-	   a director String 
+	   a director String
 	   an actors set of Persons
-	
+
 	a set of Persons with
 	   a name String
 	   a dob Date
@@ -74,18 +74,18 @@ A mapping defined separately on a set, using a subset (defining a relation calle
 	a set of Users with
 	  a username String
 	  a password String
-	  
+
 	a Followed set of Users with
 	  a followers set of Users
 
 An implicitly named field (called *profile*, relating *Users* to *Profiles*)
 
-	a set of Users with 
+	a set of Users with
 	  a Profile
 
 An implicitly named set-typed field (called *options*, relating *Questions* to Options)
 
-	a set of Questions with 
+	a set of Questions with
 	  a set of Options
 
 A model of a simple folder scheme in which folders and files have names:
@@ -93,24 +93,24 @@ A model of a simple folder scheme in which folders and files have names:
 	a set of Folders with
 	  an optional parent Folder
 	  a name String
-	  
+
 	a RootFolder element of Folder
-	
-	a set of Files with 
+
+	a set of Files with
 	  a Folder
 	  a name String
 
 A model of a Unix like scheme in which names are local to directories:
 
 	a set of FileSystemObjects
-	
+
 	a Files set of FileSystemObjects
-	
+
 	a Directories set of FileSystemObjects with
 	  a set of Entries
-	  
+
 	a RootDirectory element of Directories
-	
+
 	a set of Entries with
 	  a name String
 	  a member FileSystemObject
@@ -136,7 +136,7 @@ The collection of objects view is probably how non-technical readers will prefer
 
 		a set of Books with
 		 a title String
-		 an author String	
+		 an author String
 
 		a set of Members with
 		 a read set of Books
@@ -146,31 +146,31 @@ The collection of objects view is probably how non-technical readers will prefer
 		a set of Users with
 		  a username String
 		  a password String
-	
+
 		a set of Users with
 		  an Avatar
 		  a displayName String
 
 - **Defining associations**. The relational view also makes it easier to grasp how an association can be defined. For example, a declaration in one concept may define the expected, inherent structure of an object, and a declaration in another may define an object's association with another object. For example, in these declarations the first defines the conventional structure of an email address, and the second maps each email address to the server that hosts its email account:
- 	
+
 		a set of EmailAddresses with
 		  a username String
 		  a Domain
-	
-		a set of EmailAddresses with 
+
+		a set of EmailAddresses with
 		  a Server
 
 - **Generic types**. A concept can treat some types as parameters, which means that they are generic and instantiated on use. For example, a commenting concept may associate comments with generic "items," which in a particular system will turn out to be articles, or posts, etc. In this case, there will generally be declarations in different concepts that declare sets that will actually be the same set when the concepts are instantiated. For example, a posting concept might declare a set of posts with content and author, and a commenting concept might declare a set of items each of which is associated with a set of comments, where the items will turn out to be the posts:
 
 		a set of Items with
 		 a set of Comments
-	
-		a set of Posts with 
+
+		a set of Posts with
 		 a content String
 		 an author User
 
 ## Declaration structure, navigation & invariants
-The way that declarations are structured does *not* imply anything about what navigation pattern is supported. In particular, there is no implication from a set declaration of an expected iteration over the set, or that going from the "parent" to the "child" is supported but not the reverse. So if we write 
+The way that declarations are structured does *not* imply anything about what navigation pattern is supported. In particular, there is no implication from a set declaration of an expected iteration over the set, or that going from the "parent" to the "child" is supported but not the reverse. So if we write
 
 	a set of Users with
 	  a Group
@@ -181,13 +181,13 @@ for example, this does *not* mean that to find the users associated with a given
 	  a set of Users
 
 so that given a group one could "navigate" directly to the group's users. On the contrary, which of these is preferred depends on two factors. First, in some cases, one might seem more natural; for example, preferring the second if one wanted to emphasize the nature of groups. Second, there may be a multiplicity constraint that one formulation will allow, obviating the need to make the constraint explicit. In this case, for example, the first declaration makes it clear that each user belongs to only one group, whereas to assert this in the presence of the second declaration, an additional constraint would have to be noted informally.
- 
+
 ## Grammar
 - *schema* ::= ( *set-decl* \| *subset-decl* )\*
 - *set-decl* ::= \[ "a" \| "an" \]  ("element" \| "set") \[ "of" \] *object-type* \[ "with" *field-decl* \+ \]
 - *subset-decl* ::= \[ "a" \| "an" \]  *sub-type*  ("element" \| "set") \[ "of" \] ( *object-type* \| *sub-type* ) \[ "with" *field-decl* \+ \]
 - *field-decl* ::=  \[ "a" \| "an" \] \["optional"\] \[*field-name*\] (*scalar-type*  \| *set-type*)
-- *scalar-type* ::= *object-type* \| *parameter-type* \| *enumeration-type* \| *primitive-type* 
+- *scalar-type* ::= *object-type* \| *parameter-type* \| *enumeration-type* \| *primitive-type*
 - *set-type* ::= ("set" \| "seq" ) \[ "of" \] *scalar-type*
 - *enumeration-type* ::= "of" (*enum-constant* "or" )\+ *enum-constant*
 
@@ -205,7 +205,7 @@ so that given a group one could "navigate" directly to the group's users. On the
 - A *field-decl* that has a *set-type* cannot use the *optional* keyword.
 
 ## Lexical considerations: identifiers
-- The identifiers *enum-constant*, *field-name*, *sub-type*, *object-type*, *parameter-type* and *primitive-type* are sequences of alphabetic characters, digits and underscores, starting with an alphabetic character. The alphabetic characters in an *enum-constant* must all be uppercase. A *field-name* must start with a lower case alphabetic character. A *subset-name*, *object-type*, *parameter-type* or *primitive-type* must start with an upper case alphabetic character. 
+- The identifiers *enum-constant*, *field-name*, *sub-type*, *object-type*, *parameter-type* and *primitive-type* are sequences of alphabetic characters, digits and underscores, starting with an alphabetic character. The alphabetic characters in an *enum-constant* must all be uppercase. A *field-name* must start with a lower case alphabetic character. A *subset-name*, *object-type*, *parameter-type* or *primitive-type* must start with an upper case alphabetic character.
 - The standard values from which a *primitive-type* is drawn are "Number", "String", "Flag", "Date", "DateTime".
 
 ## Lexical considerations: layout
@@ -218,12 +218,12 @@ so that given a group one could "navigate" directly to the group's users. On the
 - The name of a field can be omitted only for an object type or a set of object types, in which case the implicit name of the field is the lowercased version of the type name, singular for a scalar and plural for a set.
 
 ## Overview of Key Semantic Features
-The key semantic features of SSF are: the ability to declare sets of objects, along with relations that map them to other objects or primitive values, and subsets of these sets, with additional relations. A basic set of primitive types is provided, as well as enumerations. The language is first-order, so an object can be mapped to a set of objects or scalars, but not to a set of sets. Union types are currently not supported. 
+The key semantic features of SSF are: the ability to declare sets of objects, along with relations that map them to other objects or primitive values, and subsets of these sets, with additional relations. A basic set of primitive types is provided, as well as enumerations. The language is first-order, so an object can be mapped to a set of objects or scalars, but not to a set of sets. Union types are currently not supported.
 
 - Set and subset declarations introduce sets of objects, named by *object-types* and *sub-types*. Every member of a subset is expected also to be a member of the corresponding superset. For a regular object type, adding an object to a set will typically correspond to creating the object; in contrast, adding an object to a subset involves taking an existing object and making it belong to the subset. This is not true for a parameter type, which represents objects allocated elsewhere, and which can therefore be added to a top level set without needing to be created.
 - The subsets of a set can overlap. Subsets offer a way both to classify objects (in a traditional subtype hierarchy) and also a way to declare relations on existing sets without extending the set declaration.
 - When the keyword "element" is used rather than "set" in a set or subset declaration, the declared set is constrained to contain exactly one object.
-- The value of an object is just its identity, so an object should not be thought of as a composite. But the notion of an object (as in object-oriented programming) is naturally represented as an object with fields, where the fields are considered to be relations mapping the object (identity) to other values. 
+- The value of an object is just its identity, so an object should not be thought of as a composite. But the notion of an object (as in object-oriented programming) is naturally represented as an object with fields, where the fields are considered to be relations mapping the object (identity) to other values.
 - Every field can be viewed as a relation that maps an object to a set of values that may be empty or may contain a single value or multiple values. An optional scalar field corresponds to the empty case. A field with a set type should *not* be declared as optional; instead an empty set should be used when there is no value to map to.
 - A field that is declared with the seq keyword is like one declared with the set keyword, except that the elements are ordered.
 
@@ -239,6 +239,6 @@ A schema can be translated into a MongoDB database as follows:
 - A field of the primitive type Number is represented with an integer value.
 -  A field of the primitive type Date or DateTime is represented with Mongo's BSON Date datatype.
 
-When an object of an object type (but not of a parameter type) is inserted into a set, a new document is added and a fresh identifier is generated and associated with the document. When an object is inserted into a subset, or an object of a parameter type is inserted into a set, a new document is added but its identifier is the old identifier of the object that the document represents. 
+When an object of an object type (but not of a parameter type) is inserted into a set, a new document is added and a fresh identifier is generated and associated with the document. When an object is inserted into a subset, or an object of a parameter type is inserted into a set, a new document is added but its identifier is the old identifier of the object that the document represents.
 
 This default translation, due to being rather simplistic, is inconsistent with the earlier claim that the declaration structure does not imply that some navigations are more efficient than others. Should this be a problem, it would be better to preserve the representation independence of the declarations, and allow richer transformations.
