@@ -4,6 +4,7 @@ import { assertEquals, assertExists, assertNotEquals } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
 import CategorizingConcept from "./CategorizingConcept.ts";
+import FicCategoryDoc from "./CategorizingConcept.ts";
 import { Config as LLMConfig } from "../../../gemini-llm.ts"; // Adjust path as needed based on project structure
 
 // Load LLM API Key from environment for testing.
@@ -37,7 +38,11 @@ Deno.test("Principle: User submits story, gets categorization, and can view it",
     console.log(`Output: ${JSON.stringify(categorizeResult)}`);
 
     assertNotEquals("error" in categorizeResult, true, `categorizeFic should not return an error: ${JSON.stringify(categorizeResult)}`);
-    const { suggestedTags, tagsToRemove } = (await categorizingConcept._viewFicCategory({ficId: ficA})) as { suggestedTags: any[]; tagsToRemove: any[] };
+    const ficViewResult = await categorizingConcept._viewFicCategory({ficId: ficA});
+    if ("error" in ficViewResult) {
+      throw new Error("no");
+    }
+    const { suggestedTags, tagsToRemove } = ficViewResult[0] as { suggestedTags: any[]; tagsToRemove: any[] };
 
     assertExists(suggestedTags, "Suggested tags array should exist.");
     assertExists(tagsToRemove, "Tags to remove array should exist.");
@@ -46,7 +51,11 @@ Deno.test("Principle: User submits story, gets categorization, and can view it",
 
     // Verify viewFicCategory
     console.log(`Action: viewFicCategory for ${ficA}`);
-    const viewResult = await categorizingConcept._viewFicCategory({ ficId: ficA });
+    const viewResult1 = await categorizingConcept._viewFicCategory({ ficId: ficA });
+    if("error" in viewResult1) {
+      throw new Error;
+    }
+    const viewResult = viewResult1[0];
     console.log(`Output: ${JSON.stringify(viewResult)}`);
 
     assertNotEquals("error" in viewResult, true, "viewFicCategory should not return an error.");
@@ -69,6 +78,74 @@ Deno.test("Principle: User submits story, gets categorization, and can view it",
   }
 });
 
+Deno.test("ISATEST", async () => {
+  const [db, client] = await testDb();
+  const categorizingConcept = new CategorizingConcept(db, llmConfig);
+
+  try {
+    console.log(`\n--- ISATEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ---`);
+    console.log(`Action: categorizeFic for ${ficE}`);
+    const categorizeResult = await categorizingConcept.categorizeFic({
+      ficId: ficE,
+      ficText: `“Ar ar ar ar ar ar ar ar ar ar ar,” says Freddy menacingly as he looks down at Jax.
+
+
+
+“You're not the furry one, I am!” Jax responds angrily. Jax begins to go into a fit of rage and transform into a werewolf when Pomni comes out from behind him.
+
+
+
+“No Jax, this isn't you!” She exclaims. “You have love deep down in your heart.”
+
+
+
+“LV you say?” A voice comes from afar. “It's been a long time since I've heard about that one.”
+
+
+
+In walks a short skeleton man. Freddy Fazbear grows pale as he realizes he's about to have a bad time. Before anyone catches what's happening, Freddy runs off, leaving the skeleton man laughing in his wake.
+
+
+
+“I guess he found my presence un-bear-able.” The skeleton says. “Name's Sans. Sans Undertale.”
+
+
+
+Then Michael Distortion comes in and distorts everything and everything is distorted and he laughs really loud and Pomni abstracts and Jax abstracts and Sans realizes he's met his match.
+
+
+
+“You won't get away with this,” says Sans, his blue orb glowing with rage.
+
+
+
+“Get away with what?” Michael says. Then the world abstracts and everyone abstracts and Michael becomes an omnipotent, benevolent chaos god of the multiverse.`,
+      authorTags: "Freddy Fazbear\nJax (TADC)\nPomni (TADC)\nSans\nMichael Distortion\nAlpha/Beta/Omega Dynamics\nEvil Sans\nHumor\nAbstraction\nHurt/Comfort\nAlternate Universe-RPF\nDestiel\nThere Was Only One Bed\nNo Beta We Die Like Michael Distortion",
+    });
+    console.log(`Output: ${JSON.stringify(categorizeResult)}`);
+
+    assertNotEquals("error" in categorizeResult, true, `categorizeFic should not return an error: ${JSON.stringify(categorizeResult)}`);
+
+    // const ficCategory: FicCategoryDoc = await categorizingConcept._viewFicCategory({ficId: ficE}) as FicCategoryDoc;
+
+    const thingy = await categorizingConcept._viewFicCategory({ficId: ficE});
+
+    if("error" in thingy) {
+      throw new Error("NO");
+    }
+
+    const suggestedTags = thingy[0].suggestedTags;
+    const tagsToRemove = thingy[0].tagsToRemove;
+
+    console.log(`SuggestedTags: \n${suggestedTags.map((v) => `${v.name} (type: ${v.type}): ${v.reason}`)}`);
+    console.log(`TagsToRemove: \n${tagsToRemove.map((v) => `${v.name} (type: ${v.type}): ${v.reason}`)}`);
+
+  } finally {
+    await client.close();
+  }
+});
+
+
 Deno.test("Scenario 1: Updating an existing fic's categorization", async () => {
   const [db, client] = await testDb();
   const categorizingConcept = new CategorizingConcept(db, llmConfig);
@@ -86,7 +163,7 @@ Deno.test("Scenario 1: Updating an existing fic's categorization", async () => {
     });
     console.log(`Output: ${JSON.stringify(initialResult)}`);
     assertNotEquals("error" in initialResult, true, "Initial categorization should not fail.");
-    const initialSuggestedLength = ((await categorizingConcept._viewFicCategory({ficId: ficB})) as any).suggestedTags.length;
+    const initialSuggestedLength = ((await categorizingConcept._viewFicCategory({ficId: ficB})) as any)[0].suggestedTags.length;
 
     // Update with new, very different text
     const ficTextUpdated = "A space opera where aliens fight for control of a galaxy.";
@@ -100,7 +177,7 @@ Deno.test("Scenario 1: Updating an existing fic's categorization", async () => {
     });
     console.log(`Output: ${JSON.stringify(updatedResult)}`);
     assertNotEquals("error" in updatedResult, true, "Update categorization should not fail.");
-    const updatedSuggestedLength = ((await categorizingConcept._viewFicCategory({ficId: ficB})) as any).suggestedTags.length;
+    const updatedSuggestedLength = ((await categorizingConcept._viewFicCategory({ficId: ficB})) as any)[0].suggestedTags.length;
 
     // Verify the update reflects in the database
     console.log(`Query: viewFicCategory for ${ficB} after update`);
@@ -109,13 +186,13 @@ Deno.test("Scenario 1: Updating an existing fic's categorization", async () => {
 
     assertNotEquals("error" in viewResult, true, "View after update should not return an error.");
     assertExists(viewResult, "View result should exist.");
-    assertEquals((viewResult as any)._id, ficB, "Retrieved fic ID should match.");
+    assertEquals((viewResult as any)[0]._id, ficB, "Retrieved fic ID should match.");
     // Asserting length changed, indicating an update happened, but not specific content.
     // No, and here's why: it outputs vaguely the same amount of tags every time. if it
     // responded with ['charlie', 'michael'] the first time,
     // it doesn't mean the second time it would be incorrect to output ['distortion', 'ella']
     // assertNotEquals((viewResult as any).suggestedTags.length, initialSuggestedLength, "Suggested tags length should have potentially changed after update.");
-    assertEquals((viewResult as any).suggestedTags.length, updatedSuggestedLength, "Suggested tags length should match the last update's output.");
+    assertEquals((viewResult as any)[0].suggestedTags.length, updatedSuggestedLength, "Suggested tags length should match the last update's output.");
 
     // Ensure only one entry for ficB exists after the update (upsert behavior)
     const allCategories = await categorizingConcept._getAllFicCategories();

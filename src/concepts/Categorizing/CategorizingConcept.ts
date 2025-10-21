@@ -38,7 +38,7 @@ interface FicInput {
  * where `_id` is the 'Fic' identifier, and `suggestedTags` and `tagsToRemove`
  * are arrays of `Tag` objects (acting as the 'Category' type).
  */
-interface FicCategoryDoc {
+export interface FicCategoryDoc {
   _id: Fic; // The ID of the fic this categorization applies to
   suggestedTags: Tag[];
   tagsToRemove: Tag[];
@@ -64,11 +64,19 @@ export default class CategorizingConcept {
 
   constructor(private readonly db: Db, llmConfig: LLMConfig) {
     this.ficCategories = this.db.collection(PREFIX + "ficCategories");
-    this.llm = new GeminiLLM(llmConfig);
+    if(llmConfig === undefined) {
+      const llmConfig2: LLMConfig = { apiKey: Deno.env.get("GEMINI_API_KEY") || "fake-api-key-for-tests" };
+      this.llm = new GeminiLLM(llmConfig2);
+    }
+    else {
+      this.llm = new GeminiLLM(llmConfig);
+    }
   }
 
   private getTagsCsvContext(): string {
-    const csvFilePath = '../tagsEdited2021.csv';
+    // For whatever reason, when running deno tests here, change this to ../tagsEdited2021.csv
+    // and it works
+    const csvFilePath = '../../../tagsEdited2021.csv';
 
     return this.readCsvFileAsString(csvFilePath);
   }
@@ -192,10 +200,17 @@ Return ONLY the JSON object, no additional text.
           throw new Error('No JSON found in response');
       }
       const parsedResponse = JSON.parse(jsonMatch[0]);
+      // console.log(parsedResponse);
       // const parsedResponse: LLMOutput = JSON.parse(llmResponseText);
 
-      const suggestedTags = parsedResponse.suggestedTags || [];
-      const tagsToRemove = parsedResponse.tagsToRemove || [];
+      // const suggestedTags = parsedResponse.tagsToAdd || [];
+      // const tagsToRemove = parsedResponse.tagsToRemove || [];
+      const suggestedTags = parsedResponse.content.tagsToAdd;
+      const tagsToRemove = parsedResponse.content.tagsToRemove;
+      // console.log(suggestedTags);
+      // console.log(tagsToRemove);
+      // console.log(`SuggestedTags: \n${suggestedTags.map((v: Tag) => `${v.name} (type: ${v.type}): ${v.reason}`)}`);
+      // console.log(`TagsToRemove: \n${tagsToRemove.map((v: Tag) => `${v.name} (type: ${v.type}): ${v.reason}`)}`);
 
       // Filter suggested tags to ensure no duplicates with author's existing tags
       const existingAuthorTagNames = new Set(
@@ -231,7 +246,7 @@ Return ONLY the JSON object, no additional text.
   }
 
   /**
-   * **viewFicCategory** (fic) : (ficCategory)
+   * **viewFicCategory** (fic) : (ficCategory[])
    *
    * Retrieves the categorization data (suggested tags and tags to remove) for a specific fic.
    *
@@ -241,7 +256,7 @@ Return ONLY the JSON object, no additional text.
    */
   async _viewFicCategory(
     { ficId }: { ficId: Fic },
-  ): Promise<FicCategoryDoc | { error: string }> {
+  ): Promise<FicCategoryDoc[] | { error: string }> {
     if (!ficId) {
       return { error: "Fic ID is required." };
     }
@@ -252,7 +267,7 @@ Return ONLY the JSON object, no additional text.
       return { error: `FicCategory for fic ID '${ficId}' not found.` };
     }
 
-    return ficCategory;
+    return [ficCategory];
   }
 
   /**

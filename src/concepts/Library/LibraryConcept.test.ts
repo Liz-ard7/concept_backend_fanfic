@@ -58,7 +58,10 @@ Deno.test("Principle: User submits stories and views them in their library.", as
       user: userAlice,
     });
     assertNotEquals("error" in getAllVersionsResult, true, "Retrieving all versions should succeed.");
-    const versions = (getAllVersionsResult as { versions: unknown[] }).versions;
+    if ("error" in getAllVersionsResult) {
+      throw new Error("No");
+    }
+    const versions = (getAllVersionsResult[0] as { versions: unknown[] }).versions;
     assertEquals(versions.length, 2, "Alice's library should contain two stories.");
     console.log(`_getAllUserVersions (user: ${userAlice}): { versions: [ ..., ... ] }`);
 
@@ -72,8 +75,11 @@ Deno.test("Principle: User submits stories and views them in their library.", as
       ficName: "The Enchanted Forest",
       versionNumber: 0,
     });
+    if ("error" in viewFicResult) {
+      throw new Error("no");
+    }
     assertNotEquals("error" in viewFicResult, true, "Viewing a specific fic should succeed.");
-    const viewedFic = (viewFicResult as { fic: { text: string } }).fic;
+    const viewedFic = (viewFicResult[0] as { fic: { text: string } }).fic;
     assertEquals(
       viewedFic.text,
       "Once upon a time, in a land far, far away...",
@@ -122,7 +128,7 @@ Deno.test("Scenario: Submitting new versions and verifying updates.", async () =
       throw new Error("New version submission should succeed. Error: " + versionAfterV1.error);
       // return; // If this is inside an async function that just returns
     }
-    assertEquals(versionAfterV1.version.fics.length, 2, "The version should now have two fics.");
+    assertEquals(versionAfterV1[0].version.fics.length, 2, "The version should now have two fics.");
     console.log(`submitNewVersionOfFanfic (user: ${userBob}, versionTitle: "Epic Tale", ...): { version: { fics: [..., ...] } }`);
 
     // 4. View original version 0
@@ -131,8 +137,11 @@ Deno.test("Scenario: Submitting new versions and verifying updates.", async () =
       ficName: "Epic Tale",
       versionNumber: 0,
     });
+    if ("error" in viewFicV0Result) {
+      throw new Error("no");
+    }
     assertNotEquals("error" in viewFicV0Result, true, "Viewing version 0 should succeed.");
-    const viewedFicV0 = (viewFicV0Result as { fic: { text: string; versionNumber: number } }).fic;
+    const viewedFicV0 = (viewFicV0Result[0] as { fic: { text: string; versionNumber: number } }).fic;
     assertEquals(viewedFicV0.text, "Chapter 1: The Beginning.", "Version 0 content mismatch.");
     assertEquals(viewedFicV0.versionNumber, 0, "Version 0 number mismatch.");
     console.log(`viewFic (user: ${userBob}, ficName: "Epic Tale", versionNumber: 0): { fic: { text: "Chapter 1...", versionNumber: 0 } }`);
@@ -143,8 +152,11 @@ Deno.test("Scenario: Submitting new versions and verifying updates.", async () =
       ficName: "Epic Tale",
       versionNumber: 1,
     });
+    if("error" in viewFicV1Result) {
+      throw new Error("no");
+    }
     assertNotEquals("error" in viewFicV1Result, true, "Viewing version 1 should succeed.");
-    const viewedFicV1 = (viewFicV1Result as { fic: { text: string; versionNumber: number } }).fic;
+    const viewedFicV1 = (viewFicV1Result[0] as { fic: { text: string; versionNumber: number } }).fic;
     assertEquals(
       viewedFicV1.text,
       "Chapter 1: The Beginning. Chapter 2: The Journey.",
@@ -158,8 +170,11 @@ Deno.test("Scenario: Submitting new versions and verifying updates.", async () =
       user: userBob,
       versionTitle: "Epic Tale",
     });
+    if ("error" in getVersionResult) {
+      throw new Error("No");
+    }
     assertNotEquals("error" in getVersionResult, true, "Getting full version should succeed.");
-    const fullVersion = (getVersionResult as { version: { fics: unknown[] } }).version;
+    const fullVersion = (getVersionResult[0] as { version: { fics: unknown[] } }).version;
     assertEquals(fullVersion.fics.length, 2, "Full version should contain both fics.");
     console.log(`getVersion (user: ${userBob}, versionTitle: "Epic Tale"): { version: { fics: [..., ...] } }`);
   } finally {
@@ -309,7 +324,11 @@ Deno.test("Scenario: Deleting fics and versions.", async () => {
     console.log(`submitNewVersionOfFanfic (user: ${userDavid}, versionTitle: "Story A", ...): { version: ... }`);
 
     // Verify current state
-    let versions = (await libraryConcept._getAllUserVersions({ user: userDavid })) as { versions: { title: string; fics: unknown[] }[] };
+    const alluservers2 = await libraryConcept._getAllUserVersions({ user: userDavid });
+    if ("error" in alluservers2) {
+      throw new Error("No");
+    }
+    let versions = alluservers2[0] as { versions: { title: string; fics: unknown[] }[] };
     assertEquals(versions.versions.length, 2, "David should have 2 distinct story versions.");
     assertEquals(versions.versions.find(v => v.title === "Story A")?.fics.length, 2, "Story A should have 2 revisions.");
     assertEquals(versions.versions.find(v => v.title === "Story B")?.fics.length, 1, "Story B should have 1 revision.");
@@ -325,10 +344,13 @@ Deno.test("Scenario: Deleting fics and versions.", async () => {
     console.log(`deleteFic (user: ${userDavid}, ficName: "Story A", versionNumber: 0): { fic: ... }`);
 
     // Verify Story A has only 1 fic now, and old V1 is re-indexed to V0
-    const storyAVersion = (await libraryConcept._getVersion({ user: userDavid, versionTitle: "Story A" })) as { version: { fics: { text: string; versionNumber: number }[] } };
-    assertEquals(storyAVersion.version.fics.length, 1, "Story A should have 1 revision left.");
-    assertEquals(storyAVersion.version.fics[0].text, "Story A - updated.", "The remaining fic should be the updated one.");
-    // assertEquals(storyAVersion.version.fics[0].versionNumber, 0, "The remaining fic should be re-indexed to V0.");
+    const storyAVersion = (await libraryConcept._getVersion({ user: userDavid, versionTitle: "Story A" }));
+    if("error" in storyAVersion) {
+      throw new Error;
+    }
+    assertEquals(storyAVersion[0].version.fics.length, 1, "Story A should have 1 revision left.");
+    assertEquals(storyAVersion[0].version.fics[0].text, "Story A - updated.", "The remaining fic should be the updated one.");
+    // assertEquals(storyAVersion[0].version.fics[0].versionNumber, 0, "The remaining fic should be re-indexed to V0.");
     console.log(`getVersion (user: ${userDavid}, versionTitle: "Story A"): { version: { fics: [ (Story A - updated, V0) ] } }`);
 
     // Delete an entire version (Story B)
@@ -340,7 +362,11 @@ Deno.test("Scenario: Deleting fics and versions.", async () => {
     console.log(`deleteVersion (user: ${userDavid}, ficTitle: "Story B"): { version: ... }`);
 
     // Verify only Story A remains
-    versions = (await libraryConcept._getAllUserVersions({ user: userDavid })) as { versions: { title: string; fics: unknown[] }[] };
+    const alluservers1 = await libraryConcept._getAllUserVersions({ user: userDavid });
+    if ("error" in alluservers1) {
+      throw new Error("No");
+    }
+    versions = alluservers1[0] as { versions: { title: string; fics: unknown[] }[] };
     assertEquals(versions.versions.length, 1, "David should have 1 story version left.");
     assertEquals(versions.versions[0].title, "Story A", "Only Story A should remain.");
     console.log(`_getAllUserVersions (user: ${userDavid}): { versions: [ (Story A: 1 fic) ] }`);
@@ -356,7 +382,11 @@ Deno.test("Scenario: Deleting fics and versions.", async () => {
     console.log(`deleteFic (user: ${userDavid}, ficName: "Story A", versionNumber: 0): { fic: ... }`);
 
     // Verify no stories remain
-    versions = (await libraryConcept._getAllUserVersions({ user: userDavid })) as { versions: { title: string; fics: unknown[] }[] };
+    const alluservers = await libraryConcept._getAllUserVersions({ user: userDavid });
+    if ("error" in alluservers) {
+      throw new Error("No");
+    }
+    versions = alluservers[0] as { versions: { title: string; fics: unknown[] }[] };
     assertEquals(versions.versions.length, 0, "David should have no story versions left.");
     console.log(`_getAllUserVersions (user: ${userDavid}): { versions: [] }`);
 
@@ -422,7 +452,10 @@ Deno.test("Scenario: findFicWithDate and deleteFicsAndUser.", async () => {
       date: dateJan1_2023,
     });
     assertNotEquals("error" in findJan1Result, true, "Finding fics for Jan 1 should succeed.");
-    let ficsJan1 = (findJan1Result as { fics: unknown[] }).fics;
+    if ("error" in findJan1Result) {
+      throw new Error("No");
+    }
+    let ficsJan1 = (findJan1Result[0] as { fics: unknown[] }).fics;
     assertEquals(ficsJan1.length, 2, "Should find 2 fics for Jan 1, 2023.");
     console.log(`findFicWithDate (user: ${userEve}, date: Jan 1, 2023): { fics: [..., ...] }`);
 
@@ -432,7 +465,10 @@ Deno.test("Scenario: findFicWithDate and deleteFicsAndUser.", async () => {
       date: dateJan2_2023,
     });
     assertNotEquals("error" in findJan2Result, true, "Finding fics for Jan 2 should succeed.");
-    let ficsJan2 = (findJan2Result as { fics: unknown[] }).fics;
+    if ("error" in findJan2Result) {
+      throw new Error("No");
+    }
+    let ficsJan2 = (findJan2Result[0] as { fics: unknown[] }).fics;
     assertEquals(ficsJan2.length, 1, "Should find 1 fic for Jan 2, 2023.");
     console.log(`findFicWithDate (user: ${userEve}, date: Jan 2, 2023): { fics: [...] }`);
 
@@ -442,7 +478,10 @@ Deno.test("Scenario: findFicWithDate and deleteFicsAndUser.", async () => {
       date: { day: 3, month: 1, year: 2023 },
     });
     assertNotEquals("error" in findNonExistentDateResult, true, "Finding fics for non-existent date should succeed (return empty).");
-    const ficsNonExistentDate = (findNonExistentDateResult as { fics: unknown[] }).fics;
+    if ("error" in findNonExistentDateResult) {
+      throw new Error("No");
+    }
+    const ficsNonExistentDate = (findNonExistentDateResult[0] as { fics: unknown[] }).fics;
     assertEquals(ficsNonExistentDate.length, 0, "Should find 0 fics for non-existent date.");
     console.log(`findFicWithDate (user: ${userEve}, date: Jan 3, 2023): { fics: [] }`);
 

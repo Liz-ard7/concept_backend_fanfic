@@ -246,7 +246,7 @@ export default class LibraryConcept {
       ficName: string;
       versionNumber: number;
     },
-  ): Promise<{ fic: Fic } | { error: string }> {
+  ): Promise<[{ fic: Fic }] | { error: string }> {
     const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
       return { error: `User '${user}' does not exist.` };
@@ -278,7 +278,7 @@ export default class LibraryConcept {
       };
     }
 
-    return { fic: fic };
+    return [{ fic: fic }];
   }
 
   /**
@@ -372,7 +372,7 @@ export default class LibraryConcept {
    */
   async _findFicWithDate(
     { user, date }: { user: User; date: DateSpec },
-  ): Promise<{ fics: Fic[] } | { error: string }> {
+  ): Promise<[{ fics: Fic[] }] | { error: string }> {
     const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
       return { error: `User '${user}' does not exist.` };
@@ -390,7 +390,7 @@ export default class LibraryConcept {
         }
       }
     }
-    return { fics: matchingFics };
+    return [{ fics: matchingFics }];
   }
 
   /**
@@ -405,7 +405,7 @@ export default class LibraryConcept {
    */
   async _getVersion(
     { user, versionTitle }: { user: User; versionTitle: string },
-  ): Promise<{ version: Version } | { error: string }> {
+  ): Promise<[{ version: Version }] | { error: string }> {
     const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
       return { error: `User '${user}' does not exist.` };
@@ -417,7 +417,7 @@ export default class LibraryConcept {
         error: `Version with title '${versionTitle}' not found for user '${user}'.`,
       };
     }
-    return { version: version };
+    return [{ version: version }];
   }
 
   /**
@@ -457,15 +457,15 @@ export default class LibraryConcept {
    * @query _getAllUserVersions
    * @description Retrieves all story versions for a given user.
    * @param {User} user The ID of the user.
-   * @returns {{ versions: Version[] } | { error: string }} An array of version objects on success, or an error object.
+   * @returns {[{ versions: Version[] }] | { error: string }} An array of version objects on success, or an error object.
    */
   async _getAllUserVersions(
     { user }: { user: User },
-  ): Promise<{ versions: Version[] } | { error: string }> {
+  ): Promise<[{ versions: Version[] }] | { error: string }> {
     const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
       return { error: `User '${user}' does not exist.` };
     }
-    return { versions: userDoc.versions };
+    return [{ versions: userDoc.versions }];
   }
 }

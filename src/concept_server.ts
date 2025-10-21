@@ -24,6 +24,22 @@ async function main() {
   const [db] = await getDb();
   const app = new Hono();
 
+  app.use('*', async (c, next) => {
+    await next(); // let the next middleware/handler run
+
+    c.res.headers.set('Access-Control-Allow-Origin', '*');
+    c.res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  });
+
+  app.options('*', (c) => {
+    return c.body(null, 204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    });
+  });
+
   app.get("/", (c) => c.text("Concept Server is running."));
 
   // --- Dynamic Concept Loading and Routing ---
