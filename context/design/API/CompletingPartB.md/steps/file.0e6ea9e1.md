@@ -1,3 +1,12 @@
+---
+timestamp: 'Sun Oct 26 2025 21:55:58 GMT-0400 (Eastern Daylight Time)'
+parent: '[[..\20251026_215558.eb2f718e.md]]'
+content_id: 0e6ea9e1ab6d57104e38058e98fa271f21ba8df3c2ff2e8672700e7d080a5a64
+---
+
+# file: src\concepts\Categorizing\CategorizingConcept.ts
+
+```typescript
 import { Collection, Db } from "npm:mongodb";
 import { ID } from "@utils/types.ts";
 // import { freshID } from "@utils/database.ts"; // freshID is used for generating new IDs if needed
@@ -341,3 +350,5 @@ Return ONLY the JSON object, no additional text.
     return this.ficCategories.find({}).toArray();
   }
 }
+
+```
