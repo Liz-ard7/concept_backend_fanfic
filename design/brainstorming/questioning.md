@@ -284,3 +284,5 @@ This error occurs when you try to access a property (like `apiKey`) on a variabl
 
 *   **Error 1:** Double-check the existence and exact path/name of `src/concepts/conceptsConcept.ts`.
 *   **Error 2:** Your Gemini API Key is not being provided to the `GeminiLLM` constructor. Most likely, you need to set an environment variable named `GEMINI_API_KEY` before running your Deno application.
+
+Please say github aint broken now.
