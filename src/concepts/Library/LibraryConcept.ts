@@ -370,28 +370,28 @@ export default class LibraryConcept {
    * @requires user must exist in set of Users
    * @effects returns a set of Fics with dates matching the provided date. If there are no such fics, it returns an empty set.
    */
-  async _findFicWithDate(
-    { user, date }: { user: User; date: DateSpec },
-  ): Promise<[{ fics: Fic[] }] | { error: string }> {
-    const userDoc = await this.users.findOne({ _id: user });
-    if (!userDoc) {
-      return { error: `User '${user}' does not exist.` };
-    }
+  // async _findFicWithDate(
+  //   { user, date }: { user: User; date: DateSpec },
+  // ): Promise<[{ fics: Fic[] }] | { error: string }> {
+  //   const userDoc = await this.users.findOne({ _id: user });
+  //   if (!userDoc) {
+  //     return { error: `User '${user}' does not exist.` };
+  //   }
 
-    const matchingFics: Fic[] = [];
-    for (const version of userDoc.versions) {
-      for (const fic of version.fics) {
-        if (
-          fic.date.day === date.day &&
-          fic.date.month === date.month &&
-          fic.date.year === date.year
-        ) {
-          matchingFics.push(fic);
-        }
-      }
-    }
-    return [{ fics: matchingFics }];
-  }
+  //   const matchingFics: Fic[] = [];
+  //   for (const version of userDoc.versions) {
+  //     for (const fic of version.fics) {
+  //       if (
+  //         fic.date.day === date.day &&
+  //         fic.date.month === date.month &&
+  //         fic.date.year === date.year
+  //       ) {
+  //         matchingFics.push(fic);
+  //       }
+  //     }
+  //   }
+  //   return [{ fics: matchingFics }];
+  // }
 
   /**
    * @action getVersion

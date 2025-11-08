@@ -447,43 +447,43 @@ Deno.test("Scenario: findFicWithDate and deleteFicsAndUser.", async () => {
     console.log(`submitNewVersionOfFanfic (user: ${userEve}, versionTitle: "First Day", ...): { version: ... }`);
 
     // Find fics with date Jan 1, 2023
-    let findJan1Result = await libraryConcept._findFicWithDate({
-      user: userEve,
-      date: dateJan1_2023,
-    });
-    assertNotEquals("error" in findJan1Result, true, "Finding fics for Jan 1 should succeed.");
-    if ("error" in findJan1Result) {
-      throw new Error("No");
-    }
-    let ficsJan1 = (findJan1Result[0] as { fics: unknown[] }).fics;
-    assertEquals(ficsJan1.length, 2, "Should find 2 fics for Jan 1, 2023.");
-    console.log(`findFicWithDate (user: ${userEve}, date: Jan 1, 2023): { fics: [..., ...] }`);
+    // let findJan1Result = await libraryConcept._findFicWithDate({
+    //   user: userEve,
+    //   date: dateJan1_2023,
+    // });
+    // assertNotEquals("error" in findJan1Result, true, "Finding fics for Jan 1 should succeed.");
+    // if ("error" in findJan1Result) {
+    //   throw new Error("No");
+    // }
+    // let ficsJan1 = (findJan1Result[0] as { fics: unknown[] }).fics;
+    // assertEquals(ficsJan1.length, 2, "Should find 2 fics for Jan 1, 2023.");
+    // console.log(`findFicWithDate (user: ${userEve}, date: Jan 1, 2023): { fics: [..., ...] }`);
 
-    // Find fics with date Jan 2, 2023
-    let findJan2Result = await libraryConcept._findFicWithDate({
-      user: userEve,
-      date: dateJan2_2023,
-    });
-    assertNotEquals("error" in findJan2Result, true, "Finding fics for Jan 2 should succeed.");
-    if ("error" in findJan2Result) {
-      throw new Error("No");
-    }
-    let ficsJan2 = (findJan2Result[0] as { fics: unknown[] }).fics;
-    assertEquals(ficsJan2.length, 1, "Should find 1 fic for Jan 2, 2023.");
-    console.log(`findFicWithDate (user: ${userEve}, date: Jan 2, 2023): { fics: [...] }`);
+    // // Find fics with date Jan 2, 2023
+    // let findJan2Result = await libraryConcept._findFicWithDate({
+    //   user: userEve,
+    //   date: dateJan2_2023,
+    // });
+    // assertNotEquals("error" in findJan2Result, true, "Finding fics for Jan 2 should succeed.");
+    // if ("error" in findJan2Result) {
+    //   throw new Error("No");
+    // }
+    // let ficsJan2 = (findJan2Result[0] as { fics: unknown[] }).fics;
+    // assertEquals(ficsJan2.length, 1, "Should find 1 fic for Jan 2, 2023.");
+    // console.log(`findFicWithDate (user: ${userEve}, date: Jan 2, 2023): { fics: [...] }`);
 
-    // Find fics with a non-existent date
-    const findNonExistentDateResult = await libraryConcept._findFicWithDate({
-      user: userEve,
-      date: { day: 3, month: 1, year: 2023 },
-    });
-    assertNotEquals("error" in findNonExistentDateResult, true, "Finding fics for non-existent date should succeed (return empty).");
-    if ("error" in findNonExistentDateResult) {
-      throw new Error("No");
-    }
-    const ficsNonExistentDate = (findNonExistentDateResult[0] as { fics: unknown[] }).fics;
-    assertEquals(ficsNonExistentDate.length, 0, "Should find 0 fics for non-existent date.");
-    console.log(`findFicWithDate (user: ${userEve}, date: Jan 3, 2023): { fics: [] }`);
+    // // Find fics with a non-existent date
+    // const findNonExistentDateResult = await libraryConcept._findFicWithDate({
+    //   user: userEve,
+    //   date: { day: 3, month: 1, year: 2023 },
+    // });
+    // assertNotEquals("error" in findNonExistentDateResult, true, "Finding fics for non-existent date should succeed (return empty).");
+    // if ("error" in findNonExistentDateResult) {
+    //   throw new Error("No");
+    // }
+    // const ficsNonExistentDate = (findNonExistentDateResult[0] as { fics: unknown[] }).fics;
+    // assertEquals(ficsNonExistentDate.length, 0, "Should find 0 fics for non-existent date.");
+    // console.log(`findFicWithDate (user: ${userEve}, date: Jan 3, 2023): { fics: [] }`);
 
     // Delete Eve and all her fics
     const deleteUserResult = await libraryConcept.deleteFicsAndUser({ user: userEve });

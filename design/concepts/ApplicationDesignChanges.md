@@ -31,3 +31,7 @@ It's interesting-- I wouldn't have thought to do that either at first. It's like
 [Line 73](../../context/design/concepts/Categorizing/implementation.md/steps/response.f39d99a0.md)
 
 # For assignment 4b I did not change anything within the design in the backend
+
+# Assignment 4c
+
+I got rid of _findFicsWithDate as I realized it was an extremely unnecessary feature. If I put it in the library UI, a major section of the library would suddenly become dedicated solely to finding Fics with a certain date, which distracts from the main purpose of the page, which is to add Fics and view them. Moreover, finding fics with a certain date is wholely useless, and I cannot imagine it is a common-enough need that there would be a dedicated search bar for it making the UI far more clunky.

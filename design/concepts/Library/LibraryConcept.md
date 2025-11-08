@@ -80,13 +80,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** removes all versions from the set of user's Versions, then removes user from set of Users.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **_findFicWithDate** (user, date: Date): (set of Fics)
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** returns a set of Fics with dates matching the provided date. If there are no such fics, it returns an empty set.
-
-
 &nbsp;&nbsp;&nbsp;&nbsp; **_getVersion** (user, versionTitle: string): (version)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users, versionTitle must exist within the user's set of Versions' Titles.
