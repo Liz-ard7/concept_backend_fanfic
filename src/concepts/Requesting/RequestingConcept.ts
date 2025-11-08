@@ -15,8 +15,8 @@ import "jsr:@std/dotenv/load";
  * - REQUESTING_TIMEOUT: the timeout for requests, default 10000ms
  * - REQUESTING_SAVE_RESPONSES: whether to persist responses or not, default true
  */
-//const PORT = parseInt(Deno.env.get("PORT") ?? "10000", 10);
-const PORT = parseInt(Deno.env.get("PORT") ?? "8000", 10);
+const PORT = parseInt(Deno.env.get("PORT") ?? "10000", 10);
+//const PORT = parseInt(Deno.env.get("PORT") ?? "8000", 10);
 const REQUESTING_BASE_URL = Deno.env.get("REQUESTING_BASE_URL") ?? "/api";
 const REQUESTING_TIMEOUT = parseInt(
   Deno.env.get("REQUESTING_TIMEOUT") ?? "10000",
