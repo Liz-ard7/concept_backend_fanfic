@@ -31,6 +31,8 @@ export const inclusions: Record<string, string> = {
   "/api/LikertSurvey/_getRespondentAnswers": "answers are visible",
   "/api/LikertSurvey/submitResponse": "allow anyone to submit response",
   "/api/LikertSurvey/updateResponse": "allow anyone to update their response",
+  "/api/UserAuthentication/register": "anyone should be able to register",
+  "/api/UserAuthentication/authenticate": "anyone should be able to authenticate",
 };
 
 /**
@@ -47,4 +49,19 @@ export const exclusions: Array<string> = [
   // Feel free to delete these example exclusions
   "/api/LikertSurvey/createSurvey",
   "/api/LikertSurvey/addQuestion",
+  "/api/UserAuthentication/deleteUser",
+  "/api/Library/addUser",
+  "/api/Library/submitNewFic",
+  "/api/Library/submitNewVersionOfFanfic",
+  "/api/Library/_viewFic",
+  "/api/Library/deleteFic",
+  "/api/Library/deleteFicsAndUser",
+  "/api/Library/_getVersion",
+  "/api/Library/deleteVersion",
+  "/api/Categorizing/categorizeFic",
+  "/api/Categorizing/_viewFicCategory",
+  "/api/Categorizing/deleteFicCategory",
+  "/api/Categorizing/deleteFicCategories",
+  "/api/Categorizing/_getAllFicCategories",
+  "/api/Library/_getAllUserVersions",
 ];

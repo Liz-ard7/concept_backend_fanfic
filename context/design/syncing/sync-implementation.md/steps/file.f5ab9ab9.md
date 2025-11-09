@@ -1,3 +1,12 @@
+---
+timestamp: 'Fri Nov 07 2025 22:49:20 GMT-0500 (Eastern Standard Time)'
+parent: '[[..\20251107_224920.00679f4d.md]]'
+content_id: f5ab9ab9d69d89fa11fa20488e9de543fbd1de3e71894f12953a3a36ae722ec7
+---
+
+# file: src\concepts\Library\LibraryConcept.ts
+
+```typescript
 
 import { Collection, Db } from "npm:mongodb";
 import { Empty, ID } from "@utils/types.ts";
@@ -35,7 +44,7 @@ interface DateSpec {
  *   a Date
  *   a versionNumber Number
  */
-export interface Fic {
+interface Fic {
   _id: ID; // Unique ID for this specific fic revision (not explicitly in spec, but good for internal tracking)
   name: string; // The name of the story, typically matches the parent Version's title
   text: string;
@@ -52,7 +61,7 @@ export interface Fic {
  *   a Title String
  *   a set of Fics
  */
-export interface Version {
+interface Version {
   _id: ID;
   title: string; // The unique title for this story for the user
   fics: Fic[]; // All revisions of this story
@@ -469,3 +478,5 @@ export default class LibraryConcept {
     return [{ versions: userDoc.versions }];
   }
 }
+
+```

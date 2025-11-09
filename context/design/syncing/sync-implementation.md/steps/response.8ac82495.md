@@ -1,62 +1,8 @@
-# Sync Implementation
-
-[@sync-background](../tools/sync-background.md)
-
-[@sample.sync](../../src/syncs/sample.sync.ts)
-
-A new action server. In this assignment, we’re providing you with a similar server, this time embodied in a special concept called Requesting. When this concept is instantiated, it starts up a server that takes requests and either passes them through (like the old server) directly to concepts, or turns them into request actions to be used in syncs. By default, requests are passed through (or “included”), so if you use the action server out of the box it will behave exactly like the old action server. For example, an HTTP request coming into the back end with the route /api/concept_c/action_a will by default call action action_a of concept concept_c.
-
-Alternatively you can list an action as “excluded,” and it will then be turned into a request action. For example, if /api/concept_c/action_a is excluded, an HTTP request coming into the back end with that route will generate the action Requesting.request (that is, the request action of the special Requesting concept) with an argument (called path) set to the string concept_c/action_a. You can then write a sync on this action. If you don’t write a sync, there will be no reaction to the request and it will eventually time out and return an error.
-
-You can also list an action as “included,” which doesn’t affect the behavior (since that’s the default) but records the fact that you intend it to be included so it will stop printing a warning message telling you that it’s been included by default.
-
-**Introducing a sync without affecting the API format**. Suppose you exclude /api/concept_c/action_a and write one or more syncs against the generated request action. For example, in addition to calling concept_c.action_a you might call Notification.notify with some appropriate arguments. Now the same HTTP request will have a new effect, due to the call of the additional action. The back end API has actually changed, but the format of the HTTP request is the same. You may need to update the front end (in this case, perhaps to no longer call an additional notification action) but you won’t need to change the code that makes the original call.
-
-**Introducing a sync that affects the API format**. Some of your changes will change the API format, however, and for those you will need to adjust the front-end calls accordingly. The typical case of this will be for authentication. Suppose you want to ensure that the user is authenticated when attempting to execute concept_c.action_a. To do that you might add a session field to the JSON record that is passed in the body of the /api/concept_c/action_a request. Then your sync can read that as the session argument of the Requesting.request action. This time the front-end call will need to be modified, since the back-end API format has changed, and now requires the session token to be passed in the body of the request.
-
-[@syncing](syncing.md)
-
-syncing provides the decisions of which actions/queries should be included and which should be excluded.
-
-Do not define new concepts. Do not write code to implement these concepts-- they are already implemented.
-
-Requesting is provided for me by my instructors to implement syncs-- it isn't something needed to be put into the app.
-
-Sessioning doesn't exist and is not a concept!!
-
-Do not implement passthrough-- that has already been completed.
-
-Here is code for my concepts.
-
-authenticatedFrames = await authenticatedFrames.query(
-      Library._getAllUserVersions,
-      { user },
-      { versions: Symbol('userVersions') },
-    );
-
-No overload matches this call.
-  Overload 1 of 2, '(f: (...args: never[]) => unknown[], input: { user: symbol; }, output: { versions: symbol; }): Frames<Frame & ExtractSymbolMappings<{ user: symbol; }, unknown>>', gave the following error.
-    Argument of type '({ user }: { user: ID; }) => Promise<[{ versions: Version[]; }] | { error: string; }>' is not assignable to parameter of type '(...args: never[]) => unknown[]'.
-      Type 'Promise<[{ versions: Version[]; }] | { error: string; }>' is missing the following properties from type 'unknown[]': length, pop, push, concat, and 35 more.
-  Overload 2 of 2, '(f: (...args: never[]) => Promise<unknown[]>, input: { user: symbol; }, output: { versions: symbol; }): Promise<Frames<Frame & ExtractSymbolMappings<{ user: symbol; }, unknown>>>', gave the following error.
-    Argument of type '({ user }: { user: ID; }) => Promise<[{ versions: Version[]; }] | { error: string; }>' is not assignable to parameter of type '(...args: never[]) => Promise<unknown[]>'.
-      Type 'Promise<[{ versions: Version[]; }] | { error: string; }>' is not assignable to type 'Promise<unknown[]>'.
-        Type '[{ versions: Version[]; }] | { error: string; }' is not assignable to type 'unknown[]'.
-          Type '{ error: string; }' is missing the following properties from type 'unknown[]': length, pop, push, concat, and 35 more.deno-ts(2769)
-
-Do not use Frames.query. Do not use Frames.
-
-Do not modify the concept files.
-
-[@CategorizingConcept](../../src/concepts/Categorizing/CategorizingConcept.ts)
-
-[@LibraryConcept](../../src/concepts/Library/LibraryConcept.ts)
-
-[@UserConcept](../../src/concepts/UserAuthentication/UserAuthenticationConcept.ts)
-
-[@RequestingConcept](../../src/concepts/Requesting/RequestingConcept.ts)
-
-# Prompt: Implement syncs for actions/queries that are excluded.
+---
+timestamp: 'Fri Nov 07 2025 23:25:00 GMT-0500 (Eastern Standard Time)'
+parent: '[[..\20251107_232500.fdafc945.md]]'
+content_id: 8ac824956596d92b26e91cee4cf14b0d65762f10849bfa6ae5563e060cc10c9e
+---
 
 # response:
 
@@ -64,19 +10,19 @@ Here's the implementation of the synchronizations based on your concept specific
 
 We'll create three `.sync.ts` files under `src/syncs/`:
 
-1.  `authentication.sync.ts`: Handles `UserAuthentication.deleteUser` and the cascade to `Library.addUser` on registration.
-2.  `library.sync.ts`: Handles all `Library` actions and their cascades to `Categorizing`.
-3.  `categorization.sync.ts`: Handles the direct `Categorizing._viewFicCategory` request.
+1. `authentication.sync.ts`: Handles `UserAuthentication.deleteUser` and the cascade to `Library.addUser` on registration.
+2. `library.sync.ts`: Handles all `Library` actions and their cascades to `Categorizing`.
+3. `categorization.sync.ts`: Handles the direct `Categorizing._viewFicCategory` request.
 
 **Key Constraints Adhered To:**
 
-*   **No concept file modification.**
-*   **No `Sessioning` concept usage.** Authentication will rely on passing `username` and `password` with `Requesting.request` for private actions.
-*   **No `frames.query` usage.** All queries and action calls within the `where` clause will be direct `await Concept.action/query(...)` calls, with manual `Frames` manipulation.
-*   Query methods from concepts return `Array<Record<string, unknown>>` or `Record<string, unknown>` (potentially with an `error` field), which needs careful unwrapping.
-*   The `where` clause *must* return a `Frames` object.
+* **No concept file modification.**
+* **No `Sessioning` concept usage.** Authentication will rely on passing `username` and `password` with `Requesting.request` for private actions.
+* **No `frames.query` usage.** All queries and action calls within the `where` clause will be direct `await Concept.action/query(...)` calls, with manual `Frames` manipulation.
+* Query methods from concepts return `Array<Record<string, unknown>>` or `Record<string, unknown>` (potentially with an `error` field), which needs careful unwrapping.
+* The `where` clause *must* return a `Frames` object.
 
----
+***
 
 First, ensure your `src/concepts/Requesting/passthrough.ts` is configured according to your decisions:
 
@@ -115,7 +61,7 @@ export const exclusions: Exclusions = [
 ];
 ```
 
----
+***
 
 Now for the synchronization files:
 
@@ -896,12 +842,12 @@ export const ViewFicCategoryRequest: Sync = (
 });
 ```
 
----
+***
 
 **Final Steps for Setup:**
 
-1.  Place these `.sync.ts` files into your `src/syncs/` directory.
-2.  Run `deno run build` from your project root to generate the `@concepts` and `@syncs` imports. This will ensure your new syncs are discovered by the engine.
-3.  Start your application with `deno run start`.
+1. Place these `.sync.ts` files into your `src/syncs/` directory.
+2. Run `deno run build` from your project root to generate the `@concepts` and `@syncs` imports. This will ensure your new syncs are discovered by the engine.
+3. Start your application with `deno run start`.
 
 Now, when an HTTP POST request hits your server at the excluded paths (e.g., `/api/UserAuthentication/deleteUser` or `/api/Library/submitNewFic`), it will trigger `Requesting.request`, and these synchronizations will orchestrate the underlying concept actions, including authentication checks and cascading effects.
