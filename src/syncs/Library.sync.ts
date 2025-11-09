@@ -18,6 +18,7 @@ const versionTitleSym = Symbol("versionTitle");
 const versionNumberSym = Symbol("versionNumber");
 const versionIdSym = Symbol("versionId");
 const errorSym = Symbol("error"); // For propagating errors
+// Removed dedicated versionsSym; we'll bind directly to the parameter symbol 'versions'
 
 /**
  * Helper to authenticate a user given username and password from a frame.
@@ -203,7 +204,8 @@ export const SubmitNewFicError: Sync = (
     [Library.submitNewFic, {}, { error }],
   ),
   then: actions(
-    [Requesting.respond, { request, error }],
+    // Map the response 'error' field to the bound errorSym
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });
 
@@ -341,7 +343,7 @@ export const SubmitNewVersionError: Sync = (
     [Library.submitNewVersionOfFanfic, {}, { error }],
   ),
   then: actions(
-    [Requesting.respond, { request, error }],
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });
 
@@ -462,7 +464,7 @@ export const DeleteFicByUserIdSuccess: Sync = (
     // 1. Delete the fic from Library
     [Library.deleteFic, { user, ficName, versionNumber }],
     // 2. Cascade delete in Categorizing
-    [Categorizing.deleteFicCategory, { ficId }],
+  [Categorizing.deleteFicCategory, { ficId }, {}],
     // 3. Respond to the original request
     [Requesting.respond, { request, ficId }],
   ),
@@ -473,7 +475,7 @@ export const DeleteFicByUserIdSuccess: Sync = (
  * Purpose: Handles errors when deleting by user ID fails.
  */
 export const DeleteFicByUserIdError: Sync = (
-  { request, user, ficName, versionNumber, error },
+  { request, user, ficName, versionNumber, error: _error },
 ) => ({
   when: actions(
     [
@@ -512,7 +514,7 @@ export const DeleteFicByUserIdError: Sync = (
     return outputFrames;
   },
   then: actions(
-    [Requesting.respond, { request, error }],
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });
 
@@ -576,7 +578,7 @@ export const DeleteFicSuccess: Sync = (
     // 1. Delete the fic from Library (use ficId from where clause, not from action output)
     [Library.deleteFic, { user, ficName, versionNumber }],
     // 2. Cascade delete in Categorizing
-    [Categorizing.deleteFicCategory, { ficId }],
+  [Categorizing.deleteFicCategory, { ficId }, {}],
     // 3. Respond to the original request
     [Requesting.respond, { request, ficId }],
   ),
@@ -587,7 +589,7 @@ export const DeleteFicSuccess: Sync = (
  * Purpose: Handles errors when deleting a fic fails (authentication or ownership issues).
  */
 export const DeleteFicError: Sync = (
-  { request, username, password, ficName, versionNumber, error },
+  { request, username, password, ficName, versionNumber, error: _error },
 ) => ({
   when: actions(
     [
@@ -626,7 +628,7 @@ export const DeleteFicError: Sync = (
     return outputFrames;
   },
   then: actions(
-    [Requesting.respond, { request, error }],
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });
 
@@ -644,7 +646,7 @@ export const DeleteFicsAndUserCascadingDeleteCategorizing: Sync = (
 ) => ({
   when: actions(
     [UserAuthentication.deleteUser, {}, { user }], // When user is deleted from auth
-    [Library.deleteFicsAndUser, { user }], // And their library is deleted
+    [Library.deleteFicsAndUser, { user }, {}], // And their library is deleted (explicit empty output)
   ),
   where: async (inputFrames) => {
     const outputFrames: Frames = new Frames();
@@ -673,7 +675,7 @@ export const DeleteFicsAndUserCascadingDeleteCategorizing: Sync = (
     return outputFrames;
   },
   then: actions(
-    [Categorizing.deleteFicCategories, { ficIds }],
+    [Categorizing.deleteFicCategories, { ficIds }, {}],
   ),
 });
 
@@ -785,7 +787,7 @@ export const DeleteVersionByUserIdSuccess: Sync = (
     // 1. Delete the version from Library
     [Library.deleteVersion, { user, ficTitle }],
     // 2. Cascade delete in Categorizing for all fics in that version
-    [Categorizing.deleteFicCategories, { ficIds }],
+  [Categorizing.deleteFicCategories, { ficIds }, {}],
     // 3. Respond to the original request
     [Requesting.respond, { request, versionId }],
   ),
@@ -832,7 +834,7 @@ export const DeleteVersionByUserIdError: Sync = (
     return outputFrames;
   },
   then: actions(
-    [Requesting.respond, { request, error }],
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });
 
@@ -896,7 +898,7 @@ export const DeleteVersionRequest: Sync = (
     // 1. Delete the version from Library
     [Library.deleteVersion, { user, ficTitle }, { versionId }],
     // 2. Cascade delete in Categorizing for all fics in that version
-    [Categorizing.deleteFicCategories, { ficIds }],
+  [Categorizing.deleteFicCategories, { ficIds }, {}],
     // 3. Respond to the original request
     [Requesting.respond, { request, versionId }],
   ),
@@ -926,7 +928,7 @@ export const GetAllUserVersionsRequest: Sync = (
   where: async (inputFrames) => {
     const outputFrames: Frames = new Frames();
     for (const frame of inputFrames) {
-      const userId = frame[user] as ID;
+  const userId = frame[user] as ID;
 
       // Query all versions for the user
       const versionsResult = await Library._getAllUserVersions({
@@ -934,18 +936,48 @@ export const GetAllUserVersionsRequest: Sync = (
       });
 
       if ("error" in versionsResult) {
-        outputFrames.push({ ...frame, [errorSym]: versionsResult.error });
+        // Skip error frames; handled by GetAllUserVersionsError
         continue;
       }
 
       // Extract versions from array result
       const versionsData = (versionsResult[0] as { versions: Version[] }).versions;
 
-      outputFrames.push({ ...frame, [versions]: versionsData });
+  // Bind directly to the 'versions' parameter symbol so respond won't miss it
+  outputFrames.push({ ...frame, [versions]: versionsData });
     }
     return outputFrames;
   },
   then: actions(
-    [Requesting.respond, { request, versions }],
+  [Requesting.respond, { request, versions }],
+  ),
+});
+
+/**
+ * Sync: GetAllUserVersionsError
+ * Purpose: Handles error responses for _getAllUserVersions.
+ */
+export const GetAllUserVersionsError: Sync = (
+  { request, user, error: _error },
+) => ({
+  when: actions(
+    [Requesting.request, { path: "/Library/_getAllUserVersions", user }, { request }],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const userId = frame[user] as ID;
+      const versionsResult = await Library._getAllUserVersions({ user: userId });
+      if ("error" in versionsResult) {
+        outputFrames.push({ ...frame, [errorSym]: versionsResult.error });
+        continue;
+      }
+      // Skip successful frames; handled by GetAllUserVersionsRequest
+    }
+    return outputFrames;
+  },
+  then: actions(
+    // Map error field to bound errorSym to prevent missing binding
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });

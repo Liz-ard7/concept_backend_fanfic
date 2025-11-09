@@ -5,32 +5,9 @@ import { Version } from "@concepts/Library/LibraryConcept.ts"; // Import types f
 
 // Define Symbols for variables used in frames
 const userSym = Symbol("user");
-const usernameSym = Symbol("username");
-const passwordSym = Symbol("password");
 const _requestSym = Symbol("request");
 const ficIdsSym = Symbol("ficIds"); // To collect all fic IDs for cascading delete
 const errorSym = Symbol("error"); // For propagating errors
-
-/**
- * Helper to authenticate a user given username and password from a frame.
- * Returns the user ID or an error.
- */
-async function authenticateUserInFrame(
-  frame: Record<symbol, unknown>,
-): Promise<{ user?: ID; error?: string }> {
-  const username = frame[usernameSym] as string;
-  const password = frame[passwordSym] as string;
-
-  if (!username || !password) {
-    return { error: "Username and password are required for authentication." };
-  }
-
-  const authResult = await UserAuthentication.authenticate({ username, password });
-  if ("error" in authResult) {
-    return { error: `Authentication failed: ${authResult.error}` };
-  }
-  return { user: authResult.user };
-}
 
 /**
  * Sync: AuthRegisterAddUser
@@ -64,7 +41,7 @@ export const AuthRegisterAddUser: Sync = ({ user }) => ({
  *          triggers categorizing cleanup, and responds.
  */
 export const DeleteUserSuccess: Sync = (
-  { request, username, password, user, ficIds },
+  { request, username, password },
 ) => ({
   when: actions(
     [Requesting.request, { path: "/UserAuthentication/deleteUser", username, password }, { request }],
@@ -72,8 +49,18 @@ export const DeleteUserSuccess: Sync = (
   where: async (inputFrames) => {
     const outputFrames: Frames = new Frames();
     for (const frame of inputFrames) {
-      const authResult = await authenticateUserInFrame(frame);
-      if (authResult.error || !authResult.user) {
+      // Extract username and password using the symbols created by the parameters
+      const usernameValue = frame[username] as string;
+      const passwordValue = frame[password] as string;
+
+      if (!usernameValue || !passwordValue) {
+        // Skip frames without credentials
+        continue;
+      }
+
+      // Authenticate directly with the values
+      const authResult = await UserAuthentication.authenticate({ username: usernameValue, password: passwordValue });
+      if ("error" in authResult) {
         // Skip error frames; handled by DeleteUserError
         continue;
       }
@@ -96,14 +83,12 @@ export const DeleteUserSuccess: Sync = (
     return outputFrames;
   },
   then: actions(
-    [UserAuthentication.deleteUser, { username, password }, { user }],
-    [Library.deleteFicsAndUser, { user }],
-    [_Categorizing.deleteFicCategories, { ficIds }],
-    [Requesting.respond, { request, user }],
+    [UserAuthentication.deleteUser, { username, password }, { user: userSym }],
+      [Library.deleteFicsAndUser, { user: userSym }, {}],
+      [_Categorizing.deleteFicCategories, { ficIds: ficIdsSym }, {}],
+    [Requesting.respond, { request, user: userSym }],
   ),
-});
-
-/**
+});/**
  * Sync: DeleteUserError
  * Purpose: Returns an error immediately when authentication fails.
  */
@@ -116,9 +101,19 @@ export const DeleteUserError: Sync = (
   where: async (inputFrames) => {
     const outputFrames: Frames = new Frames();
     for (const frame of inputFrames) {
-      const authResult = await authenticateUserInFrame(frame);
-      if (authResult.error || !authResult.user) {
-        outputFrames.push({ ...frame, [errorSym]: authResult.error });
+      // Extract username and password using the symbols created by the parameters
+      const usernameValue = frame[username] as string;
+      const passwordValue = frame[password] as string;
+
+      if (!usernameValue || !passwordValue) {
+        outputFrames.push({ ...frame, [errorSym]: "Username and password are required for authentication." });
+        continue;
+      }
+
+      // Authenticate directly with the values
+      const authResult = await UserAuthentication.authenticate({ username: usernameValue, password: passwordValue });
+      if ("error" in authResult) {
+        outputFrames.push({ ...frame, [errorSym]: `Authentication failed: ${authResult.error}` });
         continue;
       }
       // Skip successful frames; handled by DeleteUserSuccess
