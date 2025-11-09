@@ -458,12 +458,31 @@ export const DeleteFicRequest: Sync = (
     return outputFrames;
   },
   then: actions(
-    // 1. Delete the fic from Library
-    [Library.deleteFic, { user, ficName, versionNumber }, { ficId }], // ficId is returned from Library.deleteFic
+    // 1. Delete the fic from Library (use ficId from where clause, not from action output)
+    [Library.deleteFic, { user, ficName, versionNumber }],
     // 2. Cascade delete in Categorizing
     [Categorizing.deleteFicCategory, { ficId }],
     // 3. Respond to the original request
     [Requesting.respond, { request, ficId }],
+  ),
+});
+
+/**
+ * Sync: DeleteFicError
+ * Purpose: Handles errors when deleting a fic fails (authentication or ownership issues).
+ */
+export const DeleteFicError: Sync = (
+  { request, error },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      { path: "/Library/deleteFic" },
+      { request, error },
+    ],
+  ),
+  then: actions(
+    [Requesting.respond, { request, error }],
   ),
 });
 

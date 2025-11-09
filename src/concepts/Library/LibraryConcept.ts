@@ -216,17 +216,8 @@ export default class LibraryConcept {
       { $push: { "versions.$.fics": newFic } },
     );
 
-    // Fetch the updated userDoc to return the full updated version
-    const updatedUserDoc = await this.users.findOne({ _id: user });
-    const updatedVersion = updatedUserDoc?.versions.find((v) =>
-      v.title === versionTitle
-    );
-
-    if (!updatedVersion) {
-      return { error: "Failed to retrieve updated version." }; // Should not happen if update was successful
-    }
-
-    return { versionId: updatedVersion._id };
+    // Return the ID of the newly created fic (not the version container ID)
+    return { versionId: newFic._id };
   }
 
   /**
