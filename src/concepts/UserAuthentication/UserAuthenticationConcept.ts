@@ -133,4 +133,17 @@ export default class UserAuthenticationConcept {
 
     return { user: userToDelete._id };
   }
+
+  /**
+   * _userExists (user: ID): ({ exists: boolean })
+   *
+   * Query to check if a user with the given ID exists in the authentication store.
+   * Useful for guarded routes in other concepts (e.g., Library.addUser).
+   */
+  async _userExists(
+    { user }: { user: User },
+  ): Promise<{ exists: boolean }> {
+    const found = await this.users.findOne({ _id: user });
+    return { exists: !!found };
+  }
 }

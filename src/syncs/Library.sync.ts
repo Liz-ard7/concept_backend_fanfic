@@ -402,9 +402,123 @@ export const ViewFicRequest: Sync = (
 });
 
 /**
- * Sync: DeleteFicRequest
- * Purpose: Handles request to delete a specific fic revision, authenticates user,
- *          ensures ownership, then deletes the fic and cascades to Categorizing.
+ * Sync: DeleteFicByUserIdSuccess
+ * Purpose: Handles deletion when user ID is provided directly (user already authenticated in frontend).
+ *
+ * Request Payload Example:
+ * {
+ *   "user": "user_id_123",
+ *   "ficName": "My First Story",
+ *   "versionNumber": 0
+ * }
+ *
+ * Expected HTTP endpoint: POST /api/Library/deleteFic
+ */
+export const DeleteFicByUserIdSuccess: Sync = (
+  { request, user, ficName, versionNumber, ficId },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      {
+        path: "/Library/deleteFic",
+        user,
+        ficName,
+        versionNumber,
+      },
+      { request },
+    ],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const userVal = frame[user] as ID;
+      const ficNameVal = frame[ficName] as string;
+      const versionNumberVal = frame[versionNumber] as number;
+
+      // Get the fic to get its ID before deletion
+      const viewFicResult = await Library._viewFic({
+        user: userVal,
+        ficName: ficNameVal,
+        versionNumber: versionNumberVal,
+      });
+
+      if ("error" in viewFicResult) {
+        // Skip error frames (let DeleteFicByUserIdError handle them)
+        continue;
+      }
+
+      const fic = (viewFicResult[0] as { fic: Fic }).fic;
+
+      // Only pass through successful frames
+      outputFrames.push({
+        ...frame,
+        [ficId]: fic._id,  // Use ficId symbol from parameters, not ficIdSym
+      });
+    }
+    return outputFrames;
+  },
+  then: actions(
+    // 1. Delete the fic from Library
+    [Library.deleteFic, { user, ficName, versionNumber }],
+    // 2. Cascade delete in Categorizing
+    [Categorizing.deleteFicCategory, { ficId }],
+    // 3. Respond to the original request
+    [Requesting.respond, { request, ficId }],
+  ),
+});
+
+/**
+ * Sync: DeleteFicByUserIdError
+ * Purpose: Handles errors when deleting by user ID fails.
+ */
+export const DeleteFicByUserIdError: Sync = (
+  { request, user, ficName, versionNumber, error },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      {
+        path: "/Library/deleteFic",
+        user,
+        ficName,
+        versionNumber,
+      },
+      { request },
+    ],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const userVal = frame[user] as ID;
+      const ficNameVal = frame[ficName] as string;
+      const versionNumberVal = frame[versionNumber] as number;
+
+      // Get the fic to check if it exists
+      const viewFicResult = await Library._viewFic({
+        user: userVal,
+        ficName: ficNameVal,
+        versionNumber: versionNumberVal,
+      });
+
+      if ("error" in viewFicResult) {
+        // Pass through error frames
+        outputFrames.push({ ...frame, [errorSym]: viewFicResult.error });
+        continue;
+      }
+
+      // Skip successful frames (let DeleteFicByUserIdSuccess handle them)
+    }
+    return outputFrames;
+  },
+  then: actions(
+    [Requesting.respond, { request, error }],
+  ),
+});
+
+/**
+ * Sync: DeleteFicSuccess
+ * Purpose: Handles successful deletion of a fic after authentication and ownership verification.
  *
  * Request Payload Example:
  * {
@@ -416,7 +530,7 @@ export const ViewFicRequest: Sync = (
  *
  * Expected HTTP endpoint: POST /api/Library/deleteFic
  */
-export const DeleteFicRequest: Sync = (
+export const DeleteFicSuccess: Sync = (
   { request, username, password, ficName, versionNumber, user, ficId },
 ) => ({
   when: actions(
@@ -437,7 +551,7 @@ export const DeleteFicRequest: Sync = (
     for (const frame of inputFrames) {
       const authResult = await authenticateUserInFrame(frame);
       if (authResult.error || !authResult.user) {
-        outputFrames.push({ ...frame, [errorSym]: authResult.error });
+        // Skip frames with auth errors (let DeleteFicError handle them)
         continue;
       }
       const authenticatedUser = authResult.user;
@@ -445,10 +559,11 @@ export const DeleteFicRequest: Sync = (
       // Get the fic to ensure ownership and get its ID before deletion
       const ficResult = await getOwnedFic(frame, authenticatedUser);
       if (ficResult.error || !ficResult.fic) {
-        outputFrames.push({ ...frame, [errorSym]: ficResult.error });
+        // Skip frames with ownership errors (let DeleteFicError handle them)
         continue;
       }
 
+      // Only pass through successful frames
       outputFrames.push({
         ...frame,
         [userSym]: authenticatedUser,
@@ -472,15 +587,44 @@ export const DeleteFicRequest: Sync = (
  * Purpose: Handles errors when deleting a fic fails (authentication or ownership issues).
  */
 export const DeleteFicError: Sync = (
-  { request, error },
+  { request, username, password, ficName, versionNumber, error },
 ) => ({
   when: actions(
     [
       Requesting.request,
-      { path: "/Library/deleteFic" },
-      { request, error },
+      {
+        path: "/Library/deleteFic",
+        username,
+        password,
+        ficName,
+        versionNumber,
+      },
+      { request },
     ],
   ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const authResult = await authenticateUserInFrame(frame);
+      if (authResult.error || !authResult.user) {
+        // Pass through auth errors
+        outputFrames.push({ ...frame, [errorSym]: authResult.error });
+        continue;
+      }
+      const authenticatedUser = authResult.user;
+
+      // Get the fic to ensure ownership
+      const ficResult = await getOwnedFic(frame, authenticatedUser);
+      if (ficResult.error || !ficResult.fic) {
+        // Pass through ownership errors
+        outputFrames.push({ ...frame, [errorSym]: ficResult.error });
+        continue;
+      }
+
+      // Skip successful frames (let DeleteFicSuccess handle them)
+    }
+    return outputFrames;
+  },
   then: actions(
     [Requesting.respond, { request, error }],
   ),
@@ -493,8 +637,7 @@ export const DeleteFicError: Sync = (
  *          cascades to delete relevant categorization data.
  *
  * Note: This sync is triggered *after* UserAuthentication.deleteUser and Library.deleteFicsAndUser
- *       have already fired, but needs the `ficIds` that were gathered *before*
- *       Library.deleteFicsAndUser. This is handled by the `DeleteUserRequest` sync.
+ *       have already fired. The `ficIds` are gathered in the DeleteUserSuccess sync's where clause.
  */
 export const DeleteFicsAndUserCascadingDeleteCategorizing: Sync = (
   { user, ficIds },
@@ -503,10 +646,31 @@ export const DeleteFicsAndUserCascadingDeleteCategorizing: Sync = (
     [UserAuthentication.deleteUser, {}, { user }], // When user is deleted from auth
     [Library.deleteFicsAndUser, { user }], // And their library is deleted
   ),
-  where: (inputFrames) => {
-    // The ficIds should have been bound by the DeleteUserRequest sync
-    // This sync ensures Categorizing.deleteFicCategories is called for each user's ficIds
-    return inputFrames.filter((frame) => frame[ficIdsSym] !== undefined);
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const userId = frame[userSym] as ID;
+
+      // Collect all fic IDs for this user BEFORE they're deleted
+      // Note: This might fail if Library already deleted, but we try anyway
+      const getAllVersionsResult = await Library._getAllUserVersions({ user: userId });
+
+      const userFicIds: ID[] = [];
+      if (!("error" in getAllVersionsResult)) {
+        const versions: Version[] = (getAllVersionsResult[0] as { versions: Version[] }).versions;
+        for (const version of versions) {
+          for (const fic of version.fics) {
+            userFicIds.push(fic._id);
+          }
+        }
+      }
+
+      // Only push frames that have ficIds to delete
+      if (userFicIds.length > 0) {
+        outputFrames.push({ ...frame, [ficIdsSym]: userFicIds });
+      }
+    }
+    return outputFrames;
   },
   then: actions(
     [Categorizing.deleteFicCategories, { ficIds }],
@@ -560,6 +724,115 @@ export const ViewVersionRequest: Sync = (
   },
   then: actions(
     [Requesting.respond, { request, version }],
+  ),
+});
+
+/**
+ * Sync: DeleteVersionByUserIdSuccess
+ * Purpose: Handles deletion of an entire version when user ID is provided directly.
+ *
+ * Request Payload Example:
+ * {
+ *   "user": "user_id_123",
+ *   "ficTitle": "My First Story"
+ * }
+ *
+ * Expected HTTP endpoint: POST /api/Library/deleteVersion
+ */
+export const DeleteVersionByUserIdSuccess: Sync = (
+  { request, user, ficTitle, versionId, ficIds },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      { path: "/Library/deleteVersion", user, ficTitle },
+      { request },
+    ],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const userVal = frame[user] as ID;
+      const ficTitleVal = frame[ficTitle] as string;
+
+      // Get all versions for the user
+      const allVersionsResult = await Library._getAllUserVersions({ user: userVal });
+
+      if ("error" in allVersionsResult) {
+        // Skip error frames
+        continue;
+      }
+
+      const versions = (allVersionsResult[0] as { versions: Version[] }).versions;
+      const versionToDelete = versions.find((v: Version) => v.title === ficTitleVal);
+
+      if (!versionToDelete) {
+        // Skip if version not found
+        continue;
+      }
+
+      const ficsInVersion = versionToDelete.fics.map((fic: Fic) => fic._id);
+
+      outputFrames.push({
+        ...frame,
+        [versionId]: versionToDelete._id,
+        [ficIds]: ficsInVersion,
+      });
+    }
+    return outputFrames;
+  },
+  then: actions(
+    // 1. Delete the version from Library
+    [Library.deleteVersion, { user, ficTitle }],
+    // 2. Cascade delete in Categorizing for all fics in that version
+    [Categorizing.deleteFicCategories, { ficIds }],
+    // 3. Respond to the original request
+    [Requesting.respond, { request, versionId }],
+  ),
+});
+
+/**
+ * Sync: DeleteVersionByUserIdError
+ * Purpose: Handles errors when deleting version by user ID fails.
+ */
+export const DeleteVersionByUserIdError: Sync = (
+  { request, user, ficTitle, error },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      { path: "/Library/deleteVersion", user, ficTitle },
+      { request },
+    ],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const userVal = frame[user] as ID;
+      const ficTitleVal = frame[ficTitle] as string;
+
+      // Get all versions for the user
+      const allVersionsResult = await Library._getAllUserVersions({ user: userVal });
+
+      if ("error" in allVersionsResult) {
+        outputFrames.push({ ...frame, [error]: allVersionsResult.error });
+        continue;
+      }
+
+      const versions = (allVersionsResult[0] as { versions: Version[] }).versions;
+      const versionToDelete = versions.find((v: Version) => v.title === ficTitleVal);
+
+      if (!versionToDelete) {
+        outputFrames.push({ ...frame, [error]: `Version with title '${ficTitleVal}' not found.` });
+        continue;
+      }
+
+      // Skip successful frames
+    }
+    return outputFrames;
+  },
+  then: actions(
+    [Requesting.respond, { request, error }],
   ),
 });
 

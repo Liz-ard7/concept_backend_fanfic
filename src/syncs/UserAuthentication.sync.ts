@@ -1,5 +1,5 @@
 import { actions, Sync, Frames } from "@engine";
-import { UserAuthentication, Library, Categorizing, Requesting } from "@concepts";
+import { UserAuthentication, Library, Categorizing as _Categorizing, Requesting } from "@concepts";
 import { ID } from "@utils/types.ts";
 import { Version } from "@concepts/Library/LibraryConcept.ts"; // Import types for manual query processing
 
@@ -58,43 +58,32 @@ export const AuthRegisterAddUser: Sync = ({ user }) => ({
  *
  * Expected HTTP endpoint: POST /api/UserAuthentication/deleteUser
  */
-export const DeleteUserRequest: Sync = (
+/**
+ * Sync: DeleteUserSuccess
+ * Purpose: Authenticates the user, collects all ficIds, deletes the user and their library,
+ *          triggers categorizing cleanup, and responds.
+ */
+export const DeleteUserSuccess: Sync = (
   { request, username, password, user, ficIds },
 ) => ({
   when: actions(
-    [
-      Requesting.request,
-      { path: "/UserAuthentication/deleteUser", username, password },
-      { request },
-    ],
+    [Requesting.request, { path: "/UserAuthentication/deleteUser", username, password }, { request }],
   ),
   where: async (inputFrames) => {
     const outputFrames: Frames = new Frames();
-
     for (const frame of inputFrames) {
-      // 1. Authenticate the user
       const authResult = await authenticateUserInFrame(frame);
       if (authResult.error || !authResult.user) {
-        outputFrames.push({ ...frame, [errorSym]: authResult.error });
+        // Skip error frames; handled by DeleteUserError
         continue;
       }
+
       const authenticatedUser = authResult.user;
-
-      // 2. Collect all fic IDs for this user from Library BEFORE deleting
-      const getAllVersionsResult = await Library._getAllUserVersions({
-        user: authenticatedUser,
-      });
-
+      // Collect fic IDs before deletion
+      const getAllVersionsResult = await Library._getAllUserVersions({ user: authenticatedUser });
       const userFicIds: ID[] = [];
-      if ("error" in getAllVersionsResult) {
-        // If no versions, it's not an error to continue with user deletion
-        console.warn(
-          `No library versions found for user ${authenticatedUser} during deletion cascade.`,
-        );
-      } else {
-        const versions: Version[] = (getAllVersionsResult[0] as {
-          versions: Version[];
-        }).versions;
+      if (!("error" in getAllVersionsResult)) {
+        const versions: Version[] = (getAllVersionsResult[0] as { versions: Version[] }).versions;
         for (const version of versions) {
           for (const fic of version.fics) {
             userFicIds.push(fic._id);
@@ -102,27 +91,41 @@ export const DeleteUserRequest: Sync = (
         }
       }
 
-      // If all successful, bind `user` and `ficIds` to the frame
-      outputFrames.push({
-        ...frame,
-        [userSym]: authenticatedUser,
-        [ficIdsSym]: userFicIds,
-      });
+      outputFrames.push({ ...frame, [userSym]: authenticatedUser, [ficIdsSym]: userFicIds });
     }
     return outputFrames;
   },
   then: actions(
-    // Deleting the user
-    [
-      UserAuthentication.deleteUser,
-      { username, password }, // Use username/password from the request for the action itself
-      { user }, // Bind the deleted user ID
-    ],
-    // Cascade delete in Library
+    [UserAuthentication.deleteUser, { username, password }, { user }],
     [Library.deleteFicsAndUser, { user }],
-    // Cascade delete in Categorizing
-    [Categorizing.deleteFicCategories, { ficIds }],
-    // Respond to the original request
+    [_Categorizing.deleteFicCategories, { ficIds }],
     [Requesting.respond, { request, user }],
+  ),
+});
+
+/**
+ * Sync: DeleteUserError
+ * Purpose: Returns an error immediately when authentication fails.
+ */
+export const DeleteUserError: Sync = (
+  { request, username, password },
+) => ({
+  when: actions(
+    [Requesting.request, { path: "/UserAuthentication/deleteUser", username, password }, { request }],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const authResult = await authenticateUserInFrame(frame);
+      if (authResult.error || !authResult.user) {
+        outputFrames.push({ ...frame, [errorSym]: authResult.error });
+        continue;
+      }
+      // Skip successful frames; handled by DeleteUserSuccess
+    }
+    return outputFrames;
+  },
+  then: actions(
+    [Requesting.respond, { request, error: errorSym }],
   ),
 });
