@@ -35,3 +35,9 @@ and be treated each time as the same user
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the username and the password must match for a user in the set of Users
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effects** finds the user that matches with the username and password removes the user from the set of Users and returns it
+
+**queries**
+
+&nbsp;&nbsp;&nbsp;&nbsp; **_userExists** (user): (userExists: boolean)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effects** returns true if a user exists that matches that user

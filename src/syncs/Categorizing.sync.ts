@@ -1,62 +1,63 @@
 import { actions, Sync, Frames } from "@engine";
-import { UserAuthentication, Library, Categorizing, Requesting } from "@concepts";
+import { Categorizing, Requesting } from "@concepts";
+// import { UserAuthentication, Library, Categorizing, Requesting } from "@concepts";
 import { ID } from "@utils/types.ts";
-import { Fic } from "@concepts/Library/LibraryConcept.ts"; // Import Fic type for helper
+// import { Fic } from "@concepts/Library/LibraryConcept.ts"; // Import Fic type for helper
 
 // Define Symbols for variables used in frames
-const _userSym = Symbol("user");
-const _usernameSym = Symbol("username");
-const _passwordSym = Symbol("password");
-const _requestSym = Symbol("request");
-const _ficIdSym = Symbol("ficId");
-const ficNameSym = Symbol("ficName");
-const versionNumberSym = Symbol("versionNumber");
-const _ficCategorySym = Symbol("ficCategory");
+// const _userSym = Symbol("user");
+// const _usernameSym = Symbol("username");
+// const _passwordSym = Symbol("password");
+// const _requestSym = Symbol("request");
+// const _ficIdSym = Symbol("ficId");
+// const ficNameSym = Symbol("ficName");
+// const versionNumberSym = Symbol("versionNumber");
+// const _ficCategorySym = Symbol("ficCategory");
 
-/**
- * Helper to authenticate a user given username and password from a frame.
- * Returns the user ID or an error.
- */
-async function _authenticateUserInFrame(
-  frame: Record<symbol, unknown>,
-): Promise<{ user?: ID; error?: string }> {
-  const username = frame[_usernameSym] as string;
-  const password = frame[_passwordSym] as string;
+// /**
+//  * Helper to authenticate a user given username and password from a frame.
+//  * Returns the user ID or an error.
+//  */
+// async function _authenticateUserInFrame(
+//   frame: Record<symbol, unknown>,
+// ): Promise<{ user?: ID; error?: string }> {
+//   const username = frame[_usernameSym] as string;
+//   const password = frame[_passwordSym] as string;
 
-  if (!username || !password) {
-    return { error: "Username and password are required for authentication." };
-  }
+//   if (!username || !password) {
+//     return { error: "Username and password are required for authentication." };
+//   }
 
-  const authResult = await UserAuthentication.authenticate({ username, password });
-  if ("error" in authResult) {
-    return { error: `Authentication failed: ${authResult.error}` };
-  }
-  return { user: authResult.user };
-}
+//   const authResult = await UserAuthentication.authenticate({ username, password });
+//   if ("error" in authResult) {
+//     return { error: `Authentication failed: ${authResult.error}` };
+//   }
+//   return { user: authResult.user };
+// }
 
-/**
- * Helper to check if a user owns a specific fic (by ficName/versionNumber)
- * and returns the fic object, or an error.
- */
-async function _getOwnedFic(
-  frame: Record<symbol, unknown>,
-  authenticatedUser: ID,
-): Promise<{ fic?: Fic; error?: string }> {
-  const ficName = frame[ficNameSym] as string;
-  const versionNumber = frame[versionNumberSym] as number;
+// /**
+//  * Helper to check if a user owns a specific fic (by ficName/versionNumber)
+//  * and returns the fic object, or an error.
+//  */
+// async function _getOwnedFic(
+//   frame: Record<symbol, unknown>,
+//   authenticatedUser: ID,
+// ): Promise<{ fic?: Fic; error?: string }> {
+//   const ficName = frame[ficNameSym] as string;
+//   const versionNumber = frame[versionNumberSym] as number;
 
-  const viewFicResult = await Library._viewFic({
-    user: authenticatedUser,
-    ficName: ficName,
-    versionNumber: versionNumber,
-  });
+//   const viewFicResult = await Library._viewFic({
+//     user: authenticatedUser,
+//     ficName: ficName,
+//     versionNumber: versionNumber,
+//   });
 
-  if ("error" in viewFicResult) {
-    return { error: viewFicResult.error };
-  }
-  // _viewFic returns [{ fic: Fic }]
-  return { fic: (viewFicResult[0] as { fic: Fic }).fic };
-}
+//   if ("error" in viewFicResult) {
+//     return { error: viewFicResult.error };
+//   }
+//   // _viewFic returns [{ fic: Fic }]
+//   return { fic: (viewFicResult[0] as { fic: Fic }).fic };
+// }
 
 /**
  * Sync: ViewFicCategorySuccess

@@ -5,7 +5,6 @@ import { Version } from "@concepts/Library/LibraryConcept.ts"; // Import types f
 
 // Define Symbols for variables used in frames
 const userSym = Symbol("user");
-const _requestSym = Symbol("request");
 const ficIdsSym = Symbol("ficIds"); // To collect all fic IDs for cascading delete
 const errorSym = Symbol("error"); // For propagating errors
 

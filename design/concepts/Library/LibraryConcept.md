@@ -59,13 +59,6 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** create a Fic containing the fic's ficName as Name, ficText as Text, date as date, versionNumber as the length of the set of Fics within the version + 1, and authorTags as the set of authorTags. Then, add the Fic to the version within the user's set of Versions. Finally, return the Version.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **_viewFic** (user, ficName: string, versionNumber: Number): (fic)
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the ficName to exist within the set of the user's Versions' Title. user must exist in set of Users, versionNumber must exist within the range from 0 to the length of the set of Fics in version.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** displays the fic's contents corresponding to the user's Version's ficName as Title and versionNumber from the user's Version's set of Fics, then returns the fic.
-
-
 &nbsp;&nbsp;&nbsp;&nbsp; **deleteFic** (user, ficName: string, versionNumber: Number): (fic)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the ficName to exist within the set of the user's Fic's Names. user must exist in set of Users, versionNumber must exist within the range from 0 to the length of the set of Fics in version.
@@ -80,15 +73,24 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** removes all versions from the set of user's Versions, then removes user from set of Users.
 
 
-&nbsp;&nbsp;&nbsp;&nbsp; **_getVersion** (user, versionTitle: string): (version)
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users, versionTitle must exist within the user's set of Versions' Titles.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** returns the user's version associated with the versionTitle as title.
-
-
 &nbsp;&nbsp;&nbsp;&nbsp; **deleteVersion** (user, ficTitle: string): (version)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the ficTitle to exist within the set of the user's Versions' Titles. user must exist in set of Users
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** removes the version associated with ficTitle as the title from the user's set of Versions, then returns the version.
+
+
+**queries**
+
+&nbsp;&nbsp;&nbsp;&nbsp; **_viewFic** (user, ficName: string, versionNumber: Number): (fic)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** the ficName to exist within the set of the user's Versions' Title. user must exist in set of Users, versionNumber must exist within the range from 0 to the length of the set of Fics in version.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** displays the fic's contents corresponding to the user's Version's ficName as Title and versionNumber from the user's Version's set of Fics, then returns the fic.
+
+
+&nbsp;&nbsp;&nbsp;&nbsp; **_getVersion** (user, versionTitle: string): (version)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **requires** user must exist in set of Users, versionTitle must exist within the user's set of Versions' Titles.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **effect** returns the user's version associated with the versionTitle as title.

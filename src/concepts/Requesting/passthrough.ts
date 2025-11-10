@@ -33,6 +33,7 @@ export const inclusions: Record<string, string> = {
   "/api/LikertSurvey/updateResponse": "allow anyone to update their response",
   "/api/UserAuthentication/register": "anyone should be able to register",
   "/api/UserAuthentication/authenticate": "anyone should be able to authenticate",
+  "/api/UserAuthentication/_userExists": "you need to be able to check if a user exists before creating an account",
 };
 
 /**
@@ -64,4 +65,6 @@ export const exclusions: Array<string> = [
   "/api/Categorizing/deleteFicCategories",
   "/api/Categorizing/_getAllFicCategories",
   "/api/Library/_getAllUserVersions",
+  "/api/Categorizing/getTagsCsvContext",
+  "/api/Categorizing/readCsvFileAsString"
 ];

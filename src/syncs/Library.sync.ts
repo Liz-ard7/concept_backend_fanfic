@@ -7,13 +7,9 @@ import { Fic, Version } from "@concepts/Library/LibraryConcept.ts"; // Import sp
 const userSym = Symbol("user");
 const usernameSym = Symbol("username");
 const passwordSym = Symbol("password");
-const _requestSym = Symbol("request");
 const ficIdSym = Symbol("ficId"); // For a single fic ID
 const ficIdsSym = Symbol("ficIds"); // For multiple fic IDs (e.g., from a version)
-const _ficTextSym = Symbol("ficText");
 const ficNameSym = Symbol("ficName");
-const _authorTagsSym = Symbol("authorTags");
-const _dateSym = Symbol("date");
 const versionTitleSym = Symbol("versionTitle");
 const versionNumberSym = Symbol("versionNumber");
 const versionIdSym = Symbol("versionId");

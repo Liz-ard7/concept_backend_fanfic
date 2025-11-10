@@ -73,24 +73,26 @@ export default class CategorizingConcept {
     }
   }
 
-  // private getTagsCsvContext(): string {
-  //   // For whatever reason, when running deno tests here, change this to ../tagsEdited2021.csv
-  //   // and it works
-  //   const csvFilePath = '../../../tagsEdited2021.csv';
+  private getTagsCsvContext(): string {
+    // For whatever reason, when running deno tests here, change this to ../tagsEdited2021.csv
+    // and it works
+    // and for whatever reason during local testing, has to be just tagsEdited2021.csv
+    // const csvFilePath = '../../../tagsEdited2021.csv';
+    const csvFilePath = 'tagsEdited2021.csv';
 
-  //   return this.readCsvFileAsString(csvFilePath);
-  // }
+    return this.readCsvFileAsString(csvFilePath);
+  }
 
-  // private readCsvFileAsString(filePath: string): string {
-  //   try {
-  //       const fullPath = path.resolve(filePath);
-  //       const fileContent = fs.readFileSync(fullPath, { encoding: 'utf-8' });
-  //       return fileContent;
-  //   } catch (error) {
-  //       console.error(`Error reading CSV file: ${error}`);
-  //       throw error;
-  //   }
-  // }
+  private readCsvFileAsString(filePath: string): string {
+    try {
+        const fullPath = path.resolve(filePath);
+        const fileContent = fs.readFileSync(fullPath, { encoding: 'utf-8' });
+        return fileContent;
+    } catch (error) {
+        console.error(`Error reading CSV file: ${error}`);
+        throw error;
+    }
+  }
 
   // --- Actions ---
 
@@ -124,7 +126,7 @@ export default class CategorizingConcept {
       return { error: "Fic ID, text, and author tags are required." };
     }
 
-    // const csvString = this.getTagsCsvContext();
+    const csvString = this.getTagsCsvContext();
 
     // In the prompt I *would* add this:
     // OFFICIAL TAGS IN THE FORMAT OF TYPE, NAME, NUMBER OF USES (ONLY THESE - DO NOT ADD OTHERS):
@@ -178,6 +180,9 @@ For the list of tags generated for the fanfiction each with a type as specified 
 
 Do NOT return it starting with \`\`\`json and ending in \`\`\`.
 Return ONLY the JSON object, no additional text.
+
+Here is a list of the most commonly-used tags:
+${csvString}
     `;
 
     const prompt = `
