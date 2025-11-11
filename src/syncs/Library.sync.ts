@@ -514,119 +514,119 @@ export const DeleteFicByUserIdError: Sync = (
   ),
 });
 
-// /**
-//  * Sync: DeleteFicSuccess
-//  * Purpose: Handles successful deletion of a fic after authentication and ownership verification.
-//  *
-//  * Request Payload Example:
-//  * {
-//  *   "username": "testuser",
-//  *   "password": "password123",
-//  *   "ficName": "My First Story",
-//  *   "versionNumber": 0
-//  * }
-//  *
-//  * Expected HTTP endpoint: POST /api/Library/deleteFic
-//  */
-// export const DeleteFicSuccess: Sync = (
-//   { request, username, password, ficName, versionNumber, user, ficId },
-// ) => ({
-//   when: actions(
-//     [
-//       Requesting.request,
-//       {
-//         path: "/Library/deleteFic",
-//         username,
-//         password,
-//         ficName,
-//         versionNumber,
-//       },
-//       { request },
-//     ],
-//   ),
-//   where: async (inputFrames) => {
-//     const outputFrames: Frames = new Frames();
-//     for (const frame of inputFrames) {
-//       const authResult = await authenticateUserInFrame(frame);
-//       if (authResult.error || !authResult.user) {
-//         // Skip frames with auth errors (let DeleteFicError handle them)
-//         continue;
-//       }
-//       const authenticatedUser = authResult.user;
+/**
+ * Sync: DeleteFicSuccess
+ * Purpose: Handles successful deletion of a fic after authentication and ownership verification.
+ *
+ * Request Payload Example:
+ * {
+ *   "username": "testuser",
+ *   "password": "password123",
+ *   "ficName": "My First Story",
+ *   "versionNumber": 0
+ * }
+ *
+ * Expected HTTP endpoint: POST /api/Library/deleteFic
+ */
+export const DeleteFicSuccess: Sync = (
+  { request, username, password, ficName, versionNumber, user, ficId },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      {
+        path: "/Library/deleteFic",
+        username,
+        password,
+        ficName,
+        versionNumber,
+      },
+      { request },
+    ],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const authResult = await authenticateUserInFrame(frame);
+      if (authResult.error || !authResult.user) {
+        // Skip frames with auth errors (let DeleteFicError handle them)
+        continue;
+      }
+      const authenticatedUser = authResult.user;
 
-//       // Get the fic to ensure ownership and get its ID before deletion
-//       const ficResult = await getOwnedFic(frame, authenticatedUser);
-//       if (ficResult.error || !ficResult.fic) {
-//         // Skip frames with ownership errors (let DeleteFicError handle them)
-//         continue;
-//       }
+      // Get the fic to ensure ownership and get its ID before deletion
+      const ficResult = await getOwnedFic(frame, authenticatedUser);
+      if (ficResult.error || !ficResult.fic) {
+        // Skip frames with ownership errors (let DeleteFicError handle them)
+        continue;
+      }
 
-//       // Only pass through successful frames
-//       outputFrames.push({
-//         ...frame,
-//         [userSym]: authenticatedUser,
-//         [ficIdSym]: ficResult.fic._id, // Bind ficId of the one to be deleted
-//       });
-//     }
-//     return outputFrames;
-//   },
-//   then: actions(
-//     // 1. Delete the fic from Library (use ficId from where clause, not from action output)
-//     [Library.deleteFic, { user, ficName, versionNumber }],
-//     // 2. Cascade delete in Categorizing
-//   [Categorizing.deleteFicCategory, { ficId }, {}],
-//     // 3. Respond to the original request
-//     [Requesting.respond, { request, ficId }],
-//   ),
-// });
+      // Only pass through successful frames
+      outputFrames.push({
+        ...frame,
+        [userSym]: authenticatedUser,
+        [ficIdSym]: ficResult.fic._id, // Bind ficId of the one to be deleted
+      });
+    }
+    return outputFrames;
+  },
+  then: actions(
+    // 1. Delete the fic from Library (use ficId from where clause, not from action output)
+    [Library.deleteFic, { user, ficName, versionNumber }],
+    // 2. Cascade delete in Categorizing
+  [Categorizing.deleteFicCategory, { ficId }, {}],
+    // 3. Respond to the original request
+    [Requesting.respond, { request, ficId }],
+  ),
+});
 
-// /**
-//  * Sync: DeleteFicError
-//  * Purpose: Handles errors when deleting a fic fails (authentication or ownership issues).
-//  */
-// export const DeleteFicError: Sync = (
-//   { request, username, password, ficName, versionNumber, error: _error },
-// ) => ({
-//   when: actions(
-//     [
-//       Requesting.request,
-//       {
-//         path: "/Library/deleteFic",
-//         username,
-//         password,
-//         ficName,
-//         versionNumber,
-//       },
-//       { request },
-//     ],
-//   ),
-//   where: async (inputFrames) => {
-//     const outputFrames: Frames = new Frames();
-//     for (const frame of inputFrames) {
-//       const authResult = await authenticateUserInFrame(frame);
-//       if (authResult.error || !authResult.user) {
-//         // Pass through auth errors
-//         outputFrames.push({ ...frame, [errorSym]: authResult.error });
-//         continue;
-//       }
-//       const authenticatedUser = authResult.user;
+/**
+ * Sync: DeleteFicError
+ * Purpose: Handles errors when deleting a fic fails (authentication or ownership issues).
+ */
+export const DeleteFicError: Sync = (
+  { request, username, password, ficName, versionNumber, error: _error },
+) => ({
+  when: actions(
+    [
+      Requesting.request,
+      {
+        path: "/Library/deleteFic",
+        username,
+        password,
+        ficName,
+        versionNumber,
+      },
+      { request },
+    ],
+  ),
+  where: async (inputFrames) => {
+    const outputFrames: Frames = new Frames();
+    for (const frame of inputFrames) {
+      const authResult = await authenticateUserInFrame(frame);
+      if (authResult.error || !authResult.user) {
+        // Pass through auth errors
+        outputFrames.push({ ...frame, [errorSym]: authResult.error });
+        continue;
+      }
+      const authenticatedUser = authResult.user;
 
-//       // Get the fic to ensure ownership
-//       const ficResult = await getOwnedFic(frame, authenticatedUser);
-//       if (ficResult.error || !ficResult.fic) {
-//         // Pass through ownership errors
-//         outputFrames.push({ ...frame, [errorSym]: ficResult.error });
-//         continue;
-//       }
+      // Get the fic to ensure ownership
+      const ficResult = await getOwnedFic(frame, authenticatedUser);
+      if (ficResult.error || !ficResult.fic) {
+        // Pass through ownership errors
+        outputFrames.push({ ...frame, [errorSym]: ficResult.error });
+        continue;
+      }
 
-//       // Skip successful frames (let DeleteFicSuccess handle them)
-//     }
-//     return outputFrames;
-//   },
-//   then: actions(
-//     [Requesting.respond, { request, error: errorSym }],
-//   ),
-// });
+      // Skip successful frames (let DeleteFicSuccess handle them)
+    }
+    return outputFrames;
+  },
+  then: actions(
+    [Requesting.respond, { request, error: errorSym }],
+  ),
+});
 
 /**
  * Sync: DeleteFicsAndUserCascadingDeleteCategorizing
